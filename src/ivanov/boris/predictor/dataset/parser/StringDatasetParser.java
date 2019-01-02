@@ -13,7 +13,7 @@ import java.util.List;
 public class StringDatasetParser implements DatasetParser<String> {
 
     @Override
-    public Dataset<String> fromFile(String fileName) {
+    public Dataset<String> fromFile(String fileName, String delimiter) {
         Dataset<String> dataset = new Dataset<>();
 
         try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(fileName)))) {
@@ -27,7 +27,7 @@ public class StringDatasetParser implements DatasetParser<String> {
 
                 line = line.replaceAll("'", "");
 
-                List<String> entry = Arrays.asList(line.split(","));
+                List<String> entry = Arrays.asList(line.split(delimiter));
                 String response = entry.get(entry.size() - 1);
                 dataset.addEntry(new DatasetEntry<>(entry.subList(0, entry.size() - 1), response));
 

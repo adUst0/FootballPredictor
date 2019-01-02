@@ -3,27 +3,35 @@ package ivanov.boris.predictor;
 import ivanov.boris.predictor.dataset.Dataset;
 import ivanov.boris.predictor.dataset.DatasetEntry;
 import ivanov.boris.predictor.dataset.parser.DoubleDatasetParser;
+import ivanov.boris.predictor.knn.KNearestNeighbors;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 public class Main {
 
-    private static final int TESTING_SET_SIZE = 20;
+    private static final int TESTING_SET_SIZE = 5;
 
-    public static void main(String[] args) {
+    private static void testKNN() {
         DoubleDatasetParser parser = new DoubleDatasetParser();
 
-        Dataset<Double> dataset = parser.fromFile("Data/iris.data");
+        Dataset<Double> dataset = parser.fromFile("Data/iris.data", ",");
 
         Collections.shuffle(dataset.getEntries());
 
         Dataset<Double> trainingData = new Dataset<>();
         Dataset<Double> testingData = new Dataset<>();
 
+        int testingSetSize;
+//        testingSetSize = TESTING_SET_SIZE;
+        testingSetSize = (int) (dataset.size() * 0.1);
+
         for (int i = 0; i < dataset.size(); i++) {
             DatasetEntry<Double> entry = dataset.getEntries().get(i);
 
-            if (i < TESTING_SET_SIZE) {
+            if (i < testingSetSize) {
                 testingData.addEntry(new DatasetEntry<>(entry));
             }
             else {
@@ -44,8 +52,21 @@ public class Main {
         }
 
         System.out.println("Correct predictions: " + correctPredictions);
-        System.out.println("Incorrect predictions: " + (TESTING_SET_SIZE - correctPredictions));
-        System.out.println("Accuracy: " + ((float)correctPredictions / TESTING_SET_SIZE * 100) + "%");
+        System.out.println("Incorrect predictions: " + (testingSetSize - correctPredictions));
+        System.out.println("Accuracy: " + ((float)correctPredictions / testingSetSize * 100) + "%");
+    }
+
+    public static void main(String[] args) {
+        DoubleDatasetParser parser = new DoubleDatasetParser();
+
+        Dataset<Double> dataset = parser.fromFile("Data/football.data", "\\s+");
+        Classifier<Double> classifier = new KNearestNeighbors();
+        classifier.buildModel(dataset);
+
+
+        Dataset<Double> toPredict = parser.fromFile("Data/topredict.data", "\\s+");
+
+        System.out.println(classifier.classify(toPredict.getEntries().get(0)));
     }
 
 }

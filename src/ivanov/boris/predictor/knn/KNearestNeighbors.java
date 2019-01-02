@@ -1,8 +1,9 @@
 package ivanov.boris.predictor.knn;
 
+import ivanov.boris.predictor.Classifier;
 import ivanov.boris.predictor.dataset.Dataset;
 import ivanov.boris.predictor.dataset.DatasetEntry;
-import ivanov.boris.predictor.ml.Classifier;
+import ivanov.boris.predictor.dataset.IllegalDatasetException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -89,6 +90,6 @@ public class KNearestNeighbors implements Classifier<Double> {
         }
 
         // this line can not be reached with correct arguments
-        throw new IllegalArgumentException();
+        throw new IllegalDatasetException();
     }
 }

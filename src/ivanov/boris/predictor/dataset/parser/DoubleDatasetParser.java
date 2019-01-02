@@ -14,7 +14,7 @@ import java.util.List;
 public class DoubleDatasetParser implements DatasetParser<Double> {
 
     @Override
-    public Dataset<Double> fromFile(String fileName) {
+    public Dataset<Double> fromFile(String fileName, String delimiter) {
         Dataset<Double> dataset = new Dataset<>();
 
         try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(fileName)))) {
@@ -26,7 +26,7 @@ public class DoubleDatasetParser implements DatasetParser<Double> {
                     continue;
                 }
 
-                List<String> words = Arrays.asList(line.split(","));
+                List<String> words = Arrays.asList(line.split(delimiter));
                 String label = words.get(words.size() - 1);
 
                 List<Double> entry = new ArrayList<>();
