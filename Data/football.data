@@ -2,9 +2,6 @@
 % T2_PositionPoints T2_W T2_D T2_L T2_WLast6 T2_DLast6 T2_LLast6 T2_WAwayLast6 T2_DAwayLast6 T2_LAwayLast6 T2_W1v1_last6 T2_D1v1_last6 T2_L1v1_last6
 % Label (1 == Home, X == Draw, 2 == Away)
 
-% Will predict: Real Valladolid vs Rayo Vallecano on 05.01.19
-% 21 5 6 6 2 1 3 2 2 2 4 1 1    16 3 4 10 2 0 4 0 1 5 1 1 4
-
 % Сентръл Коуст - Пърт Глори 31.12.18 Au1
 2 0 2 7 0 0 6 0.66 1.66 3.66 3 0 3    20 6 2 1 4 1 1 3.66 1.66 0.66 3 0 3     2
 
