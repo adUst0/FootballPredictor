@@ -20,7 +20,7 @@ public class DoubleDatasetParser implements DatasetParser<Double> {
         try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(fileName)))) {
             String line = bufferedReader.readLine();
             while (line != null) {
-                if (line.isEmpty() || line.charAt(0) == '@' || line.charAt(0) == '%') {
+                if (line.isEmpty() || line.charAt(0) == '@' || line.charAt(0) == '%' || line.charAt(0) == '#') {
 
                     line = bufferedReader.readLine();
                     continue;
