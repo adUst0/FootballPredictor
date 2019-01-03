@@ -66,6 +66,24 @@ public class Main {
 
         Dataset<Double> toPredict = parser.fromFile("Data/topredict.data", "\\s+");
 
+        for (DatasetEntry entry : dataset.getEntries()) {
+            List<Double> attributes = entry.getAttributes();
+            double[] wdl = {attributes.get(1), attributes.get(2), attributes.get(3)};
+            int games = (int)(wdl[0] + wdl[1] + wdl[2]);
+            attributes.set(1, attributes.get(1) / games);
+            attributes.set(2, attributes.get(2) / games);
+            attributes.set(3, attributes.get(3) / games);
+        }
+
+        for (DatasetEntry entry : toPredict.getEntries()) {
+            List<Double> attributes = entry.getAttributes();
+            double[] wdl = {attributes.get(1), attributes.get(2), attributes.get(3)};
+            int games = (int)(wdl[0] + wdl[1] + wdl[2]);
+            attributes.set(1, attributes.get(1) / games);
+            attributes.set(2, attributes.get(2) / games);
+            attributes.set(3, attributes.get(3) / games);
+        }
+
         System.out.println(classifier.classify(toPredict.getEntries().get(0)));
     }
 
