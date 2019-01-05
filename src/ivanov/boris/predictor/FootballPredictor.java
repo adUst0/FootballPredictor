@@ -12,8 +12,8 @@ public class FootballPredictor {
     public static void main(String[] args) {
         DoubleDatasetParser parser = new DoubleDatasetParser();
 
-        // Dataset<Double> dataset = parser.fromFile("Data/football.data", "\\s+");
-        Dataset<Double> dataset = parser.fromFile("Data/football_new.data", "\\s+");
+         Dataset<Double> dataset = parser.fromFile("Data/football.data", "\\s+");
+//        Dataset<Double> dataset = parser.fromFile("Data/football_new.data", "\\s+");
         makeWDLproportional(dataset);
 
         Classifier<Double> classifier = new KNearestNeighbors();
