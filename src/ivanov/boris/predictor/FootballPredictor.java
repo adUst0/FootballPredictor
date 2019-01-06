@@ -12,14 +12,14 @@ public class FootballPredictor {
     public static void main(String[] args) {
         DoubleDatasetParser parser = new DoubleDatasetParser();
 
-         Dataset<Double> dataset = parser.fromFile("Data/football.footballapi", "\\s+");
+         Dataset<Double> dataset = parser.fromFile("Data/football.data", "\\s+");
 //        Dataset<Double> dataset = parser.fromFile("Data/football_new.footballapi", "\\s+");
         makeWDLproportional(dataset);
 
         Classifier<Double> classifier = new KNearestNeighbors();
         classifier.buildModel(dataset);
 
-        Dataset<Double> toPredict = parser.fromFile("Data/topredict.footballapi", "\\s+");
+        Dataset<Double> toPredict = parser.fromFile("Data/topredict.data", "\\s+");
         makeWDLproportional(toPredict);
 
         if (!isDatasetCorrect(dataset)) {
@@ -59,6 +59,7 @@ public class FootballPredictor {
     private static void makeWDLproportional(Dataset<Double> dataset) {
         for (DatasetEntry entry : dataset.getEntries()) {
             List<Double> attributes = entry.getAttributes();
+            attributes.set(0, 0.0);
             double[] wdl = {attributes.get(1), attributes.get(2), attributes.get(3)};
             int games = (int)(wdl[0] + wdl[1] + wdl[2]);
             attributes.set(1, attributes.get(1) / games);

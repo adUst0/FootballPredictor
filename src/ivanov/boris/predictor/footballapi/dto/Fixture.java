@@ -37,6 +37,9 @@ public class Fixture {
     @SerializedName("match_awayteam_score")
     private String awayTeamScore;
 
+    @SerializedName("match_status")
+    private String matchStatus;
+
     public String getCountryName() {
         return countryName;
     }
@@ -119,7 +122,7 @@ public class Fixture {
     }
 
     public String getOutcome() {
-        if (homeTeamScore == null || awayTeamScore == null) {
+        if (!matchStatus.equals("FT") || homeTeamScore == null || awayTeamScore == null || homeTeamScore.equals("") || awayTeamScore.equals("")) {
             return "?";
         }
 

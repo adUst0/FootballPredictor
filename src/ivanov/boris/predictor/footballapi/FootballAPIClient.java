@@ -9,29 +9,14 @@ import ivanov.boris.predictor.footballapi.dto.LeagueTeam;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 public class FootballAPIClient {
-
-    public static void main(String[] args) throws IOException, InterruptedException {
-        String apiKey = "3e265c14f3bac8645bf5c7389dc33c95e426d19ba0499cedb7b75fccc0b0df14";
-
-        HttpClient client = HttpClient.newHttpClient();
-        FootballAPIClient footballAPIClient = new FootballAPIClient(apiKey, client);
-
-        List<Fixture> fixtures = footballAPIClient.getFixtures("2019-01-06");
-
-        Fixture fixture = footballAPIClient.getFixture("377802");
-
-        H2H h2h = footballAPIClient.getH2H("Chelsea", "Arsenal");
-        LeagueTeam stats = footballAPIClient.getTeamStatsInLeague("62", "Liverpool");
-
-        System.out.println(fixtures);
-
-    }
 
     private final String API_URL = "https://apifootball.com/api/";
 
@@ -62,6 +47,15 @@ public class FootballAPIClient {
         return getFixtures(request);
     }
 
+    public List<Fixture> getFixtures(String date, String leagueId) throws IOException, InterruptedException {
+
+        HttpRequest request = HttpRequest.newBuilder().uri(
+                URI.create(API_URL + "?action=get_events&from=" + date + "&to=" + date +
+                        "&league_id=" + leagueId + "&APIkey=" + apiKey)).build();
+
+        return getFixtures(request);
+    }
+
     public Fixture getFixture(String id) throws IOException, InterruptedException {
         HttpRequest request = HttpRequest.newBuilder().uri(
                 URI.create(API_URL + "?action=get_events&match_id=" + id + "&APIkey=" + apiKey)).build();
@@ -69,15 +63,22 @@ public class FootballAPIClient {
         return getFixtures(request).get(0);
     }
 
-    public H2H getH2H(String firstTeam, String secondTeam) throws IOException, InterruptedException {
+    public H2H getH2H(String firstTeam, String secondTeam, String leagueId) throws IOException, InterruptedException {
         HttpRequest request = HttpRequest.newBuilder().uri(
-                URI.create(API_URL + "?action=get_H2H&firstTeam=" + firstTeam + "&secondTeam=" + secondTeam
+                URI.create(API_URL + "?action=get_H2H&firstTeam=" + URLEncoder.encode(firstTeam, StandardCharsets.UTF_8)
+                        + "&secondTeam=" + URLEncoder.encode(secondTeam, StandardCharsets.UTF_8)
                         + "&APIkey=" + apiKey)).build();
+
 
         Gson gson = new Gson();
         String json = client.send(request, HttpResponse.BodyHandlers.ofString()).body();
 
-        return gson.fromJson(json, H2H.class);
+        H2H h2h = gson.fromJson(json, H2H.class);
+        h2h.setFirstTeamName(firstTeam);
+        h2h.setSecondTeamName(secondTeam);
+        h2h.setLeagueId(leagueId);
+
+        return h2h;
     }
 
     public LeagueTeam getTeamStatsInLeague(String leagueId, String teamName) throws IOException, InterruptedException {
