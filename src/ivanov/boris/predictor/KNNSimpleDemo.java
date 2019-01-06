@@ -17,7 +17,7 @@ public class KNNSimpleDemo {
     public static void main(String[] args) {
         DoubleDatasetParser parser = new DoubleDatasetParser();
 
-        Dataset<Double> dataset = parser.fromFile("Data/iris.data", ",");
+        Dataset<Double> dataset = parser.fromFile("Data/iris.footballapi", ",");
 
         Collections.shuffle(dataset.getEntries());
 
