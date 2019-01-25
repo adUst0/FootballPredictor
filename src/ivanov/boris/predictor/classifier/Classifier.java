@@ -1,4 +1,4 @@
-package ivanov.boris.predictor;
+package ivanov.boris.predictor.classifier;
 
 import ivanov.boris.predictor.dataset.Dataset;
 import ivanov.boris.predictor.dataset.DatasetEntry;

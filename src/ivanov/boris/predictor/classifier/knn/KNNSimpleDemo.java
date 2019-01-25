@@ -1,9 +1,10 @@
-package ivanov.boris.predictor;
+package ivanov.boris.predictor.classifier.knn;
 
+import ivanov.boris.predictor.classifier.Classifier;
+import ivanov.boris.predictor.classifier.knn.KNearestNeighbors;
 import ivanov.boris.predictor.dataset.Dataset;
 import ivanov.boris.predictor.dataset.DatasetEntry;
 import ivanov.boris.predictor.dataset.parser.DoubleDatasetParser;
-import ivanov.boris.predictor.knn.KNearestNeighbors;
 
 import java.util.ArrayList;
 import java.util.Arrays;

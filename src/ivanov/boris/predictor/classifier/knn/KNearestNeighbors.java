@@ -1,10 +1,11 @@
-package ivanov.boris.predictor.knn;
+package ivanov.boris.predictor.classifier.knn;
 
-import ivanov.boris.predictor.Classifier;
+import ivanov.boris.predictor.classifier.Classifier;
 import ivanov.boris.predictor.dataset.Dataset;
 import ivanov.boris.predictor.dataset.DatasetEntry;
 import ivanov.boris.predictor.dataset.IllegalDatasetException;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,10 +41,14 @@ public class KNearestNeighbors implements Classifier<Double> {
     public String classify(DatasetEntry<Double> entry) {
         List<DatasetEntry<Double>> entries = dataset.getEntries();
 
+        final double epsilon = 0.001;
+
         entries.sort((x, y) -> {
             double distanceToX = getDistance(entry, x);
             double distanceToY = getDistance(entry, y);
-            if (/*Math.sqrt(distanceToX - distanceToY) <= 0.001*/ distanceToX == distanceToY) {
+//
+//            return Double.compare(distanceToX, distanceToY);
+            if (/*Math.sqrt(distanceToX - distanceToY) <= epsilon*/ distanceToX == distanceToY) {
                 return 0;
             }
             else if (distanceToX < distanceToY) {
