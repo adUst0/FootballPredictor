@@ -17,31 +17,31 @@ public class DatasetBuilder {
     private static List<String> leagueIds;
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        HttpClient client = HttpClient.newHttpClient();
-        footballAPIClient = new FootballAPIClient(apiKey, client);
+//        HttpClient client = HttpClient.newHttpClient();
+//        footballAPIClient = new FootballAPIClient(apiKey, client);
 
-        String from = "2019-01-14";
-        String to = "2019-01-20";
-
-        countries.put("England", "169");
-        countries.put("Spain", "171");
-        countries.put("France", "173");
-        countries.put("Italy", "170");
-        countries.put("Portugal", "176");
-        countries.put("Germany", "172");
-
-
-        leagueIds = Arrays.asList(
-                "62", "63", "64", "65", // En: Premier League, Championship, League 1, League 2
-                "109", "110", // Es: Primera / Segunda division
-                "127", "128", // Fr: League 1/2
-                "79", "81", // It: Serie A/B
-                "150", "151", // Pt: Primeira/Segunda Liga
-                "117", "118" // Germany: Bundesliga, 2nd Bundesliga
-        );
-
-//         findGames(from, to);
-        updateOutcomes("2019-01-05", "2019-01-14");
+//        String from = "2019-01-14";
+//        String to = "2019-01-20";
+//
+//        countries.put("England", "169");
+//        countries.put("Spain", "171");
+//        countries.put("France", "173");
+//        countries.put("Italy", "170");
+//        countries.put("Portugal", "176");
+//        countries.put("Germany", "172");
+//
+//
+//        leagueIds = Arrays.asList(
+//                "62", "63", "64", "65", // En: Premier League, Championship, League 1, League 2
+//                "109", "110", // Es: Primera / Segunda division
+//                "127", "128", // Fr: League 1/2
+//                "79", "81", // It: Serie A/B
+//                "150", "151", // Pt: Primeira/Segunda Liga
+//                "117", "118" // Germany: Bundesliga, 2nd Bundesliga
+//        );
+//
+////         findGames(from, to);
+//        updateOutcomes("2019-01-05", "2019-01-14");
 
         /*List<Fixture> fixtures = footballAPIClient.getFixtures("2019-01-06", "2019-01-06");
         Map<String, String> game_league = new HashMap<>();
@@ -174,38 +174,23 @@ public class DatasetBuilder {
     }
 
     private static void toBeDeletedASAP() {
-        final String fileName = "Data/new_01.06.data";
-        final String outFileName = "Data/new_01.06_fix1v1.data";
+        final String fileName = "Data/SelectedLeaguesOnly.data";
+        final String outFileName = "Data/SelectedLeaguesOnly_update.data";
 
         List<String> file = new ArrayList<>();
 
         try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(fileName)))) {
-            String line = bufferedReader.readLine();
+            String comment = bufferedReader.readLine();
+            String data = bufferedReader.readLine();
+            String newLine = bufferedReader.readLine();
 
-            while (line != null) {
-                // check if the current line is Fixture data
-                if (line.contains("% >")) {
+            while (comment != null) {
 
-                    String[] words = line.split("\\s+");
-                    words[25] = words[14];
-                    words[26] = words[13];
-                    words[27] = words[12];
+                file.add(comment);
+                file.add(data);
+                file.add(newLine);
 
-                    line = "";
-                    for (int i = 0; i < 15; i++) {
-                        line += words[i] + " ";
-                    }
-                    line += "     ";
-                    for (int i = 15; i < 28; i++) {
-                        line += words[i] + " ";
-                    }
-                    line += "     ";
-                    line += words[28];
-
-                }
-                file.add(line);
-
-                line = bufferedReader.readLine();
+                comment = bufferedReader.readLine();
             }
         } catch (IOException e) {
             e.printStackTrace();
