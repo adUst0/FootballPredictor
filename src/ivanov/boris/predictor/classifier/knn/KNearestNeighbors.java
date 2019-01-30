@@ -41,14 +41,12 @@ public class KNearestNeighbors implements Classifier<Double> {
     public String classify(DatasetEntry<Double> entry) {
         List<DatasetEntry<Double>> entries = dataset.getEntries();
 
-        final double epsilon = 0.001;
-
         entries.sort((x, y) -> {
             double distanceToX = getDistance(entry, x);
             double distanceToY = getDistance(entry, y);
 //
 //            return Double.compare(distanceToX, distanceToY);
-            if (/*Math.sqrt(distanceToX - distanceToY) <= epsilon*/ distanceToX == distanceToY) {
+            if (distanceToX == distanceToY) {
                 return 0;
             }
             else if (distanceToX < distanceToY) {

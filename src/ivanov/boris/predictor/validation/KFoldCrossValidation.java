@@ -9,51 +9,45 @@ import java.util.Collections;
 
 public class KFoldCrossValidation {
 
-    static double crossValidateKNN(int kSubsets, int kNeighbors,
+    static double validateKNN(int testingSetSize, int kNeighbors,
                               Dataset<Double> dataset, boolean isLoggingEnabled) {
 
         Collections.shuffle(dataset.getEntries());
 
-        int testingSetSize = dataset.getEntries().size() / kSubsets;
 
-        double meanAccuracy = 0;
+        Dataset<Double> trainingData = new Dataset<>();
+        Dataset<Double> testingData = new Dataset<>();
 
-        for (int i = 0; i < dataset.getEntries().size(); i += testingSetSize) {
-            Dataset<Double> trainingData = new Dataset<>();
-            Dataset<Double> testingData = new Dataset<>();
-
-            for (int j = 0; j < dataset.getEntries().size(); j++) {
-                if (j >= i && j < i + testingSetSize) {
-                    testingData.addEntry(dataset.getEntries().get(j));
-                }
-                else {
-                    trainingData.addEntry(dataset.getEntries().get(j));
-                }
+        for (int i = 0; i < dataset.size(); i++) {
+            if (i < testingSetSize) {
+                testingData.addEntry(dataset.getEntries().get(i));
             }
-
-            KNearestNeighbors knn = new KNearestNeighbors();
-            knn.buildModel(trainingData, kNeighbors);
-
-            int correctPredictionsCount = 0;
-
-            for (DatasetEntry entry : testingData.getEntries()) {
-                String label = knn.classify(entry);
-                if (label.equals(entry.getLabel())) {
-                    correctPredictionsCount++;
-                }
+            else {
+                trainingData.addEntry(dataset.getEntries().get(i));
             }
-
-            if (isLoggingEnabled) {
-                System.out.println("kNeighbors = " + kNeighbors);
-                System.out.println("\tCorrect predictions: " + correctPredictionsCount);
-                System.out.println("\tIncorrect predictions: " + (testingSetSize - correctPredictionsCount));
-                System.out.println("\t***Accuracy: " + ((double)correctPredictionsCount / testingSetSize * 100) + "%***");
-            }
-
-            meanAccuracy += (double)correctPredictionsCount / testingSetSize * 100;
         }
 
-        return meanAccuracy / kSubsets;
+        TrainingDataPreprocessor.prepare(trainingData);
+        KNearestNeighbors knn = new KNearestNeighbors();
+        knn.buildModel(trainingData, kNeighbors);
+
+        int correctPredictions = 0;
+        for (DatasetEntry entry : testingData.getEntries()) {
+            String label = knn.classify(entry);
+            if (label.equals(entry.getLabel())) {
+                correctPredictions++;
+            }
+        }
+
+        if (isLoggingEnabled) {
+            System.out.println("kNeighbors = " + kNeighbors);
+            System.out.println("\tCorrect predictions: " + correctPredictions);
+            System.out.println("\tIncorrect predictions: " + (testingSetSize - correctPredictions));
+            System.out.println("\t***Accuracy: " + ((double)correctPredictions / testingSetSize * 100) + "%***");
+        }
+
+
+        return (double)correctPredictions / testingSetSize * 100;
     }
 
     /**
@@ -63,13 +57,12 @@ public class KFoldCrossValidation {
         DoubleDatasetParser parser = new DoubleDatasetParser();
 
         Dataset<Double> dataset = parser.fromFile("Data/SelectedLeaguesOnly.data", "\\s+");
-        TrainingDataPreprocessor.prepare(dataset);
 
         for (int k = 2; k <= 20; k++) {
             double accuracy = 0;
-            int numberOfTests = 100;
+            int numberOfTests = 1000;
             for (int j = 0; j < numberOfTests; j++) {
-                accuracy += crossValidateKNN(10, k, dataset, false);
+                accuracy += validateKNN((int)(dataset.size() * 0.1), k, dataset, false);
             }
             System.out.println("k = " + k + " => Accuracy: " + (accuracy / numberOfTests) + " %");
         }
