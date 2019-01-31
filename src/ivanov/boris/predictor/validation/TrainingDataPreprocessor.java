@@ -18,13 +18,8 @@ import java.util.*;
  */
 
 public class TrainingDataPreprocessor {
-    private static final int HOME_TEAM_WINS_POSITION = 0;
-    private static final int AWAY_TEAM_WINS_POSITION = 12;
     private static final int HOME_TEAM_1V1_WINS_POSITION = 9;
-
-    private static final int HOME_TEAM_LAST6_POSITION = 3;
     private static final int HOME_TEAM_HOMELAST6_POSITION = 6;
-    private static final int AWAY_TEAM_LAST6_POSITION = 15;
     private static final int AWAY_TEAM_AWAYLAST6_POSITION = 18;
 
     /**
@@ -32,7 +27,7 @@ public class TrainingDataPreprocessor {
      * this entry will be removed from the Dataset.
      * See removeOutliers() for more info.
      */
-    private static final double MIN_PROBABILITY = 0.05;
+    private static final double MIN_PROBABILITY = 0.1;
 
     /**
      * Call all dataset preprocessing functions
@@ -42,37 +37,6 @@ public class TrainingDataPreprocessor {
     public static void prepare(Dataset<Double> dataset) {
         removeNoiseData(dataset);
         removeOutliers(dataset);
-//        normalizeDataset(dataset);
-        makeWDLproportional(dataset);
-    }
-
-    /**
-     * Make Wins-Draws-Looses proportional for both teams
-     *
-     * @param dataset the dataset which will be transformed
-     */
-    private static void makeWDLproportional(Dataset<Double> dataset) {
-
-        for (DatasetEntry entry : dataset.getEntries()) {
-            List<Double> attributes = entry.getAttributes();
-            int playedGamesCount;
-
-            playedGamesCount = (int) (
-                    attributes.get(HOME_TEAM_WINS_POSITION + 0) +
-                            attributes.get(HOME_TEAM_WINS_POSITION + 1) +
-                            attributes.get(HOME_TEAM_WINS_POSITION + 2));
-            attributes.set(HOME_TEAM_WINS_POSITION + 0, attributes.get(HOME_TEAM_WINS_POSITION + 0) / playedGamesCount);
-            attributes.set(HOME_TEAM_WINS_POSITION + 1, attributes.get(HOME_TEAM_WINS_POSITION + 1) / playedGamesCount);
-            attributes.set(HOME_TEAM_WINS_POSITION + 2, attributes.get(HOME_TEAM_WINS_POSITION + 2) / playedGamesCount);
-
-            playedGamesCount = (int) (
-                    attributes.get(AWAY_TEAM_WINS_POSITION + 0) +
-                            attributes.get(AWAY_TEAM_WINS_POSITION + 1) +
-                            attributes.get(AWAY_TEAM_WINS_POSITION + 2));
-            attributes.set(AWAY_TEAM_WINS_POSITION + 0, attributes.get(AWAY_TEAM_WINS_POSITION + 0) / playedGamesCount);
-            attributes.set(AWAY_TEAM_WINS_POSITION + 1, attributes.get(AWAY_TEAM_WINS_POSITION + 1) / playedGamesCount);
-            attributes.set(AWAY_TEAM_WINS_POSITION + 2, attributes.get(AWAY_TEAM_WINS_POSITION + 2) / playedGamesCount);
-        }
     }
 
     /**
@@ -141,25 +105,22 @@ public class TrainingDataPreprocessor {
             DatasetEntry<Double> entry = it.next();
             String label = entry.getLabel();
             int totalGamesPerCategory = 12;
-            int examinedGroups = 3;
+            int examinedGroups = 2;
             double pHomeTeam =
-                    (entry.getAttributes().get(HOME_TEAM_LAST6_POSITION) +
-                    entry.getAttributes().get(AWAY_TEAM_LAST6_POSITION + 2) +
+                    (
                             entry.getAttributes().get(HOME_TEAM_HOMELAST6_POSITION) +
-                            entry.getAttributes().get(AWAY_TEAM_AWAYLAST6_POSITION + 2) +
-                            entry.getAttributes().get(HOME_TEAM_1V1_WINS_POSITION) * 2) / totalGamesPerCategory / examinedGroups;
+                                    entry.getAttributes().get(AWAY_TEAM_AWAYLAST6_POSITION + 2) +
+                                    entry.getAttributes().get(HOME_TEAM_1V1_WINS_POSITION) * 2) / totalGamesPerCategory / examinedGroups;
             double pDraw =
-                    (entry.getAttributes().get(HOME_TEAM_LAST6_POSITION + 1) +
-                            entry.getAttributes().get(AWAY_TEAM_LAST6_POSITION + 1) +
+                    (
                             entry.getAttributes().get(HOME_TEAM_HOMELAST6_POSITION + 1) +
-                            entry.getAttributes().get(AWAY_TEAM_AWAYLAST6_POSITION + 1) +
-                            entry.getAttributes().get(HOME_TEAM_1V1_WINS_POSITION + 1) * 2) / totalGamesPerCategory / examinedGroups;
+                                    entry.getAttributes().get(AWAY_TEAM_AWAYLAST6_POSITION + 1) +
+                                    entry.getAttributes().get(HOME_TEAM_1V1_WINS_POSITION + 1) * 2) / totalGamesPerCategory / examinedGroups;
             double pAwayTeam =
-                    (entry.getAttributes().get(HOME_TEAM_LAST6_POSITION + 2) +
-                            entry.getAttributes().get(AWAY_TEAM_LAST6_POSITION) +
+                    (
                             entry.getAttributes().get(HOME_TEAM_HOMELAST6_POSITION + 2) +
-                            entry.getAttributes().get(AWAY_TEAM_AWAYLAST6_POSITION) +
-                            entry.getAttributes().get(HOME_TEAM_1V1_WINS_POSITION + 2) * 2) / totalGamesPerCategory / examinedGroups;
+                                    entry.getAttributes().get(AWAY_TEAM_AWAYLAST6_POSITION) +
+                                    entry.getAttributes().get(HOME_TEAM_1V1_WINS_POSITION + 2) * 2) / totalGamesPerCategory / examinedGroups;
             Map<String, Double> probabilities = new HashMap<>();
             probabilities.put("1", pHomeTeam);
             probabilities.put("X", pDraw);

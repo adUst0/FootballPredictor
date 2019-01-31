@@ -5,16 +5,16 @@ import ivanov.boris.predictor.dataset.Dataset;
 import ivanov.boris.predictor.dataset.DatasetEntry;
 import ivanov.boris.predictor.dataset.IllegalDatasetException;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class KNearestNeighbors implements Classifier<Double> {
+    private static final int DEFAULT_K = 10;
 
     private Dataset<Double> dataset = null;
-    private int k;
+    private int k = DEFAULT_K;
 
     private double getDistance(DatasetEntry<Double> a, DatasetEntry<Double> b) {
         double sum = 0;
@@ -29,7 +29,6 @@ public class KNearestNeighbors implements Classifier<Double> {
     @Override
     public void buildModel(Dataset<Double> dataset) {
         this.dataset = dataset;
-        this.k = (int) Math.sqrt(dataset.getEntries().size());
     }
 
     public void buildModel(Dataset<Double> dataset, int k) {
@@ -44,17 +43,8 @@ public class KNearestNeighbors implements Classifier<Double> {
         entries.sort((x, y) -> {
             double distanceToX = getDistance(entry, x);
             double distanceToY = getDistance(entry, y);
-//
-//            return Double.compare(distanceToX, distanceToY);
-            if (distanceToX == distanceToY) {
-                return 0;
-            }
-            else if (distanceToX < distanceToY) {
-                return -1;
-            }
-            else {
-                return 1;
-            }
+
+            return Double.compare(distanceToX, distanceToY);
         });
 
         // find first K neighbors
@@ -94,5 +84,13 @@ public class KNearestNeighbors implements Classifier<Double> {
 
         // this line can not be reached with correct arguments
         throw new IllegalDatasetException();
+    }
+
+    public int getK() {
+        return k;
+    }
+
+    public void setK(int k) {
+        this.k = k;
     }
 }

@@ -27,4 +27,23 @@ public class DatasetEntry<T> {
     public String getLabel() {
         return label;
     }
+
+    public void setLabel(String label) {
+        this.label = label;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+
+        for (int j = 0; j < attributes.size(); j++) {
+            sb.append(attributes.get(j)).append(" ");
+            if (j == 11 || j == 20) {
+                sb.append("    ");
+            }
+        }
+        sb.append(label);
+
+        return sb.toString();
+    }
 }
