@@ -1,6 +1,6 @@
-package ivanov.boris.predictor.classifier.knn;
+package ivanov.boris.predictor.classifier.other;
 
-import ivanov.boris.predictor.FixtureStats;
+import ivanov.boris.predictor.Fixture;
 import ivanov.boris.predictor.classifier.Classifier;
 import ivanov.boris.predictor.dataset.Dataset;
 import ivanov.boris.predictor.dataset.DatasetEntry;
@@ -16,7 +16,7 @@ public class SimpleProbability implements Classifier<Double> {
 
     @Override
     public String classify(DatasetEntry<Double> entry) {
-        Map<String, Double> probabilities = FixtureStats.fromDatasetEntry(entry).getOutcomeProbabilities();
+        Map<String, Double> probabilities = Fixture.fromDatasetEntry(entry).getOutcomeProbabilities();
 
         var iterator = probabilities.entrySet().iterator();
         var mostProbableOutcome = iterator.next();

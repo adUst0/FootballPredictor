@@ -1,25 +1,24 @@
-package ivanov.boris.predictor.validation;
+package ivanov.boris.predictor;
 
 import ivanov.boris.predictor.classifier.Classifier;
-import ivanov.boris.predictor.classifier.RandomGuess;
+import ivanov.boris.predictor.classifier.other.RandomGuess;
 import ivanov.boris.predictor.classifier.knn.KNearestNeighbors;
-import ivanov.boris.predictor.classifier.knn.SimpleProbability;
+import ivanov.boris.predictor.classifier.other.SimpleProbability;
 import ivanov.boris.predictor.dataset.Dataset;
 import ivanov.boris.predictor.dataset.DatasetEntry;
 import ivanov.boris.predictor.dataset.parser.DoubleDatasetParser;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class KFoldCrossValidation {
+public class Main {
 
     private static final String PATH_TO_DATASET = "Data/SelectedLeaguesOnly.data";
-    private static final int NUMBER_OF_TESTS = 100;
+    private static final int NUMBER_OF_TESTS = 1000;
 
-    private static double validate(int testingSetSize, Classifier<Double> classifier,
-                           Dataset<Double> dataset, boolean isLoggingEnabled) {
+    public static double validateClassifier(int testingSetSize, Classifier<Double> classifier,
+                                             Dataset<Double> dataset, boolean isLoggingEnabled) {
 
         Collections.shuffle(dataset.getEntries());
 
@@ -60,25 +59,7 @@ public class KFoldCrossValidation {
         return accuracy;
     }
 
-    /**
-     * Perform validation for different kNeighbors values and print accuracy to STDOUT
-     */
-    private static void chooseKNeighbors() {
-        DoubleDatasetParser parser = new DoubleDatasetParser();
-        KNearestNeighbors knn = new KNearestNeighbors();
-
-        for (int k = 2; k <= 20; k++) {
-            double accuracy = 0;
-            for (int j = 0; j < NUMBER_OF_TESTS; j++) {
-                knn.setK(k);
-                Dataset<Double> dataset = parser.fromFile(PATH_TO_DATASET, "\\s+");
-                accuracy += validate((int)(dataset.size() * 0.1), knn, dataset, false);
-            }
-            System.out.println("k = " + k + " => Accuracy: " + (accuracy / NUMBER_OF_TESTS) + " %");
-        }
-    }
-
-    private static void testClassifiers(List<Classifier<Double>> classifiers) {
+    public static void testClassifiers(List<Classifier<Double>> classifiers) {
         DoubleDatasetParser parser = new DoubleDatasetParser();
 
         for (Classifier<Double> classifier : classifiers) {
@@ -86,7 +67,7 @@ public class KFoldCrossValidation {
 
             for (int i = 0; i < NUMBER_OF_TESTS; i++) {
                 Dataset<Double> dataset = parser.fromFile(PATH_TO_DATASET, "\\s+");
-                accuracy += validate((int)(dataset.size() * 0.1), classifier, dataset, false);
+                accuracy += validateClassifier((int)(dataset.size() * 0.1), classifier, dataset, false);
             }
 
             System.out.println(classifier.getClass() + " => Accuracy: " + (accuracy / NUMBER_OF_TESTS) + " %");
@@ -94,11 +75,9 @@ public class KFoldCrossValidation {
 
     }
 
-    public static void main(String[] args) {
-//        chooseKNeighbors();
-
+    public static void testAllClassifiers() {
         List<Classifier<Double>> classifiers = new ArrayList<>();
-        for (int k = 2; k <= 20; k++) {
+        for (int k = 2; k <= 5; k++) {
             KNearestNeighbors knn = new KNearestNeighbors();
             knn.setK(k);
             classifiers.add(knn);
@@ -107,6 +86,14 @@ public class KFoldCrossValidation {
         classifiers.add(new RandomGuess());
         classifiers.add(new SimpleProbability());
 
+        for (int k = 2; k <= 5; k++) {
+            classifiers.add(new FootballPredictor(k));
+        }
+
         testClassifiers(classifiers);
+    }
+
+    public static void main(String[] args) {
+        testAllClassifiers();
     }
 }

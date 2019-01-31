@@ -5,12 +5,17 @@ import ivanov.boris.predictor.dataset.DatasetEntry;
 import java.util.HashMap;
 import java.util.Map;
 
-public class FixtureStats {
+/**
+ * This class has strong dependency with the Dataset format and it has to be updated accordingly on
+ * every format change.
+ */
 
-    private class Stats {
-        double wins;
-        double draws;
-        double looses;
+public class Fixture {
+
+    public class Stats {
+        public double wins;
+        public double draws;
+        public double looses;
     }
 
     private Stats team1League = new Stats(); // all games in current league season
@@ -23,6 +28,38 @@ public class FixtureStats {
     private Stats team2Last6GamesAway = new Stats();
 
     private String outcome;
+
+    public Stats getTeam1League() {
+        return team1League;
+    }
+
+    public Stats getTeam1Last6Games() {
+        return team1Last6Games;
+    }
+
+    public Stats getTeam1Last6GamesHome() {
+        return team1Last6GamesHome;
+    }
+
+    public Stats getTeam1Last6Games1v1() {
+        return team1Last6Games1v1;
+    }
+
+    public Stats getTeam2League() {
+        return team2League;
+    }
+
+    public Stats getTeam2Last6Games() {
+        return team2Last6Games;
+    }
+
+    public Stats getTeam2Last6GamesAway() {
+        return team2Last6GamesAway;
+    }
+
+    public String getOutcome() {
+        return outcome;
+    }
 
     /**
      * Calculate simple probabilities for this fixture
@@ -51,8 +88,8 @@ public class FixtureStats {
         return probabilities;
     }
 
-    public static FixtureStats fromDatasetEntry(DatasetEntry<Double> entry) {
-        FixtureStats stats = new FixtureStats();
+    public static Fixture fromDatasetEntry(DatasetEntry<Double> entry) {
+        Fixture stats = new Fixture();
         stats.team1League.wins = entry.getAttributes().get(0);
         stats.team1League.draws = entry.getAttributes().get(1);
         stats.team1League.looses = entry.getAttributes().get(2);

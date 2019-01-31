@@ -1,5 +1,6 @@
-package ivanov.boris.predictor.classifier;
+package ivanov.boris.predictor.classifier.other;
 
+import ivanov.boris.predictor.classifier.Classifier;
 import ivanov.boris.predictor.dataset.Dataset;
 import ivanov.boris.predictor.dataset.DatasetEntry;
 
@@ -17,8 +18,7 @@ public class RandomGuess implements Classifier<Double> {
             labels.add(entry.getLabel());
         }
 
-        possibleLabels = new ArrayList<String>();
-        possibleLabels.addAll(labels);
+        possibleLabels = new ArrayList<>(labels);
     }
 
     @Override
