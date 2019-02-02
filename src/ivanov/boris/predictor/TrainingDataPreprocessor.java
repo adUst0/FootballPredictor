@@ -16,7 +16,7 @@ public class TrainingDataPreprocessor {
      * this entry will be removed from the Dataset.
      * See removeOutliers() for more info.
      */
-    private static final double MIN_PROBABILITY = 0.1;
+    private static final double MIN_PROBABILITY = 0.10;
 
     /**
      * Call all dataset preprocessing functions

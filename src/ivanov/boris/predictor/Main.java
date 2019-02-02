@@ -15,7 +15,7 @@ import java.util.List;
 public class Main {
 
     private static final String PATH_TO_DATASET = "Data/SelectedLeaguesOnly.data";
-    private static final int NUMBER_OF_TESTS = 1000;
+    private static final int NUMBER_OF_TESTS = 100;
 
     public static double validateClassifier(int testingSetSize, Classifier<Double> classifier,
                                              Dataset<Double> dataset, boolean isLoggingEnabled) {
@@ -77,7 +77,7 @@ public class Main {
 
     public static void testAllClassifiers() {
         List<Classifier<Double>> classifiers = new ArrayList<>();
-        for (int k = 2; k <= 5; k++) {
+        for (int k = 4; k <= 4; k++) {
             KNearestNeighbors knn = new KNearestNeighbors();
             knn.setK(k);
             classifiers.add(knn);
@@ -86,7 +86,7 @@ public class Main {
         classifiers.add(new RandomGuess());
         classifiers.add(new SimpleProbability());
 
-        for (int k = 2; k <= 5; k++) {
+        for (int k = 4; k <= 4; k++) {
             classifiers.add(new FootballPredictor(k));
         }
 
@@ -95,5 +95,6 @@ public class Main {
 
     public static void main(String[] args) {
         testAllClassifiers();
+
     }
 }
