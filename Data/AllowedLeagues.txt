@@ -1,0 +1,20 @@
+% En: Premier League, Championship, League 1, League 2
+62 63 64 65
+
+% Es: Primera / Segunda division
+109 110
+
+% Fr: League 1/2
+127 128
+
+% It: Serie A/B
+79 81
+
+% Pt: Primeira/Segunda Liga
+150 151
+
+% Germany: Bundesliga, 2nd Bundesliga
+117 118
+
+% Australia: W League
+809

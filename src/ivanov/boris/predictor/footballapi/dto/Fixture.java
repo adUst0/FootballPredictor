@@ -56,7 +56,6 @@ public class Fixture {
         this.leagueId = leagueId;
     }
 
-
     public String getId() {
         return id;
     }

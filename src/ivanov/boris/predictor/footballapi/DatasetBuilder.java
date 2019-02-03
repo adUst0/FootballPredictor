@@ -1,6 +1,5 @@
 package ivanov.boris.predictor.footballapi;
 
-import ivanov.boris.predictor.dataset.DatasetEntry;
 import ivanov.boris.predictor.footballapi.dto.Fixture;
 import ivanov.boris.predictor.footballapi.dto.H2H;
 import ivanov.boris.predictor.footballapi.dto.LeagueTeam;
@@ -10,148 +9,77 @@ import java.net.http.HttpClient;
 import java.util.*;
 
 public class DatasetBuilder {
-    private static FootballAPIClient footballAPIClient;
-    private static String apiKey = "3e265c14f3bac8645bf5c7389dc33c95e426d19ba0499cedb7b75fccc0b0df14";
+    private static final String API_KEY = "49f38e957674ce1d1d840e4d500c7fea429d8e624f504002075ea24a9ca6e2fa";
+    private static final String ALLOWED_COUNTRIES_FILE_NAME = "Data/AllowedCountries.txt";
+    private static final String ALLOWED_LEAGUES_FILE_NAME = "Data/AllowedLeagues.txt";
 
-    private static Map<String, String> countries = new HashMap<>();
-    private static List<String> leagueIds;
+    private Map<String, String> allowedCountries = new HashMap<>();
+    private List<String> allowedLeaguesId = new ArrayList<>();
+    private FootballAPIClient footballAPIClient;
 
-    public static void main(String[] args) throws IOException, InterruptedException {
-//        HttpClient client = HttpClient.newHttpClient();
-//        footballAPIClient = new FootballAPIClient(apiKey, client);
+    public DatasetBuilder(String allowedCountriesFileName, String allowedLeaguesFileName, String apiKey) {
+        footballAPIClient = new FootballAPIClient(apiKey, HttpClient.newHttpClient());
 
-//        String from = "2019-01-14";
-//        String to = "2019-01-20";
-//
-//        countries.put("England", "169");
-//        countries.put("Spain", "171");
-//        countries.put("France", "173");
-//        countries.put("Italy", "170");
-//        countries.put("Portugal", "176");
-//        countries.put("Germany", "172");
-//
-//
-//        leagueIds = Arrays.asList(
-//                "62", "63", "64", "65", // En: Premier League, Championship, League 1, League 2
-//                "109", "110", // Es: Primera / Segunda division
-//                "127", "128", // Fr: League 1/2
-//                "79", "81", // It: Serie A/B
-//                "150", "151", // Pt: Primeira/Segunda Liga
-//                "117", "118" // Germany: Bundesliga, 2nd Bundesliga
-//        );
-//
-////         findGames(from, to);
-//        updateOutcomes("2019-01-05", "2019-01-14");
-
-        /*List<Fixture> fixtures = footballAPIClient.getFixtures("2019-01-06", "2019-01-06");
-        Map<String, String> game_league = new HashMap<>();
-        for (Fixture fixture : fixtures) {
-            game_league.put(fixture.getId(), fixture.getLeagueId());
-        }
-
-        final String fileName = "Data/football_filtered_input.data";
-        final String outFileName = "Data/football_filtered_output.data";
-
-        List<String> file = new ArrayList<>();
-
-        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(fileName)))) {
-            String comment = bufferedReader.readLine();
-            String game = bufferedReader.readLine();
-            String empty = bufferedReader.readLine();
-
-
-            while (comment != null) {
-
-                String[] tokens = comment.split(", ");
-                String gameId = tokens[tokens.length - 1];
-
-                if (leagueIds.contains(game_league.get(gameId))) {
-                    file.add(comment);
-                    file.add(game);
-                    if (empty != null) {
-                        file.add(empty);
-                    }
-                }
-
-                comment = bufferedReader.readLine();
-                game = bufferedReader.readLine();
-                empty = bufferedReader.readLine();
-            }
-
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outFileName)))) {
-            for (String line : file) {
-                bw.write(line);
-                bw.newLine();
-                bw.flush();
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
-
-
+        readAllowedCountries(allowedCountriesFileName);
+        readAllowedLeagues(allowedLeaguesFileName);
     }
 
-    private static void findGames(String from, String to) throws IOException, InterruptedException {
-        List<Fixture> fixtures = footballAPIClient.getFixtures(from, to);
+    public void findGames(String fromDate, String toDate) throws IOException, InterruptedException {
+        List<Fixture> fixtures = footballAPIClient.getFixtures(fromDate, toDate);
 
         for (Fixture fixture : fixtures) {
             try {
-                if (!fixture.getOutcome().equals("?") || !leagueIds.contains(fixture.getLeagueId())) {
+                if (!fixture.getOutcome().equals("?") ||
+                        !allowedLeaguesId.contains(fixture.getLeagueId()) ||
+                        !allowedCountries.keySet().contains(fixture.getCountryName())) {
                     continue;
                 }
 
-                String matchMetaData = getMatchMetaData(fixture);
-                String matchData = getMatchData(fixture);
+                String matchMetaData = getFixtureMetaData(fixture);
+                String matchData = getFixtureData(fixture);
 
                 System.out.println(matchMetaData);
                 System.out.println("% " + ">" + fixture.getId() + " " + matchData);
                 System.out.println();
             } catch (NullPointerException e) {
-                continue;
-            } catch (Exception e) {
-                // e.printStackTrace();
+                // Do nothing. Just skip this entry!
             }
         }
 
         System.out.println(fixtures);
     }
 
-    private static void updateOutcomes(String from, String to) throws IOException, InterruptedException {
-        final String fileName = "Data/games_week3.data";
-        final String outFileName = "Data/games_week3_outCome.data";
+    public void updateOutcomesFromFile(String fromDate, String toDate, String inputFileName,
+                                       String outputFileName) throws IOException, InterruptedException {
 
-        List<Fixture> fixtures = footballAPIClient.getFixtures(from, to);
-        Map<String, String> game_outCome = new HashMap<>();
+        List<Fixture> fixtures = footballAPIClient.getFixtures(fromDate, toDate);
+        Map<String, String> gamesOutCome = new HashMap<>();
         for (Fixture fixture : fixtures) {
-            game_outCome.put(fixture.getId(), fixture.getOutcome());
+            gamesOutCome.put(fixture.getId(), fixture.getOutcome());
         }
 
         List<String> file = new ArrayList<>();
 
-        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(fileName)))) {
+        try (BufferedReader bufferedReader =
+                     new BufferedReader(new InputStreamReader(new FileInputStream(inputFileName)))) {
             String line = bufferedReader.readLine();
 
             while (line != null) {
                 // check if the current line is Fixture data
                 if (line.contains("% >")) {
 
-                    String id = line.split(" ")[1].substring(1);
+                    String currentFixtureId = line.split(" ")[1].substring(1);
 
-                    if (!game_outCome.containsKey(id) || game_outCome.get(id).equals("?")) {
+                    if (!gamesOutCome.containsKey(currentFixtureId) || gamesOutCome.get(currentFixtureId).equals("?")) {
+                        // Don't update the entry and leave it for future update.
                         file.add(line);
-
                         line = bufferedReader.readLine();
                         continue;
                     }
 
-                    line = line.replace("?", game_outCome.get(id));
-                    line = line.substring(3 + id.length() + 1);
+                    // Update the outcome and remove the prefix with the Fixture id
+                    line = line.replace("?", gamesOutCome.get(currentFixtureId));
+                    line = line.substring(3 + currentFixtureId.length() + 1);
                 }
                 file.add(line);
 
@@ -161,7 +89,7 @@ public class DatasetBuilder {
             e.printStackTrace();
         }
 
-        try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outFileName)))) {
+        try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFileName)))) {
             for (String line : file) {
                 bw.write(line);
                 bw.newLine();
@@ -173,46 +101,56 @@ public class DatasetBuilder {
         }
     }
 
-    private static void toBeDeletedASAP() {
-        final String fileName = "Data/SelectedLeaguesOnly.data";
-        final String outFileName = "Data/SelectedLeaguesOnly_update.data";
+    private void readAllowedLeagues(String allowedLeaguesFileName) {
+        try (BufferedReader bufferedReader =
+                     new BufferedReader(new InputStreamReader(new FileInputStream(allowedLeaguesFileName)))) {
+            String line = bufferedReader.readLine();
 
-        List<String> file = new ArrayList<>();
+            while (line != null) {
 
-        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(fileName)))) {
-            String comment = bufferedReader.readLine();
-            String data = bufferedReader.readLine();
-            String newLine = bufferedReader.readLine();
+                if (line.isEmpty() || line.charAt(0) == '@' || line.charAt(0) == '%' || line.charAt(0) == '#') {
 
-            while (comment != null) {
+                    line = bufferedReader.readLine();
+                    continue;
+                }
 
-                file.add(comment);
-                file.add(data);
-                file.add(newLine);
+                allowedLeaguesId.addAll(Arrays.asList(line.split("\\s+")));
 
-                comment = bufferedReader.readLine();
+                line = bufferedReader.readLine();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outFileName)))) {
-            for (String line : file) {
-                bw.write(line);
-                bw.newLine();
-                bw.flush();
-            }
-
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private static String getMatchData(Fixture fixture) throws IOException, InterruptedException {
+    private void readAllowedCountries(String allowedCountriesFileName) {
+        try (BufferedReader bufferedReader =
+                     new BufferedReader(new InputStreamReader(new FileInputStream(allowedCountriesFileName)))) {
+            String line = bufferedReader.readLine();
+
+            while (line != null) {
+
+                if (line.isEmpty() || line.charAt(0) == '@' || line.charAt(0) == '%' || line.charAt(0) == '#') {
+
+                    line = bufferedReader.readLine();
+                    continue;
+                }
+
+                String[] entry = line.split("\\s+");
+                allowedCountries.put(entry[0], entry[1]);
+
+                line = bufferedReader.readLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private String getFixtureData(Fixture fixture) throws IOException, InterruptedException {
         StringBuilder sb = new StringBuilder();
 
-        String homeTeamLeagueStats = getLeagueStats(fixture.getLeagueId(), fixture.getHomeTeamName());
-        String awayTeamLeagueStats = getLeagueStats(fixture.getLeagueId(), fixture.getAwayTeamName());
+        String homeTeamLeagueStats = getTeamStatsInLeague(fixture.getLeagueId(), fixture.getHomeTeamName());
+        String awayTeamLeagueStats = getTeamStatsInLeague(fixture.getLeagueId(), fixture.getAwayTeamName());
 
         H2H h2h = footballAPIClient.getH2H(fixture.getHomeTeamName(), fixture.getAwayTeamName(), fixture.getLeagueId());
         String homeTeamLast6 = h2h.getFirstTeamLast6Games(false);
@@ -229,7 +167,16 @@ public class DatasetBuilder {
         return sb.toString();
     }
 
-    private static String getLeagueStats(String leagueId, String teamName) throws IOException, InterruptedException {
+    private String getFixtureMetaData(Fixture fixture) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("% ").append(fixture.getHomeTeamName()).append(" - ").append(fixture.getAwayTeamName()).append(", ").
+                append(fixture.getDate()).append(", ").append(fixture.getLeagueName()).append(", ").
+                append(fixture.getId());
+        return sb.toString();
+    }
+
+    private String getTeamStatsInLeague(String leagueId, String teamName)
+            throws IOException, InterruptedException {
         LeagueTeam lg = footballAPIClient.getTeamStatsInLeague(leagueId, teamName);
         StringBuilder sb = new StringBuilder();
         sb.append(lg.getPoints()).append(" ").append(lg.getWins()).append(" ").append(lg.getDraws()).append(" ").
@@ -238,11 +185,20 @@ public class DatasetBuilder {
     }
 
 
-    private static String getMatchMetaData(Fixture fixture) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("% ").append(fixture.getHomeTeamName()).append(" - ").append(fixture.getAwayTeamName()).append(", ").
-                append(fixture.getDate()).append(", ").append(fixture.getLeagueName()).append(", ").
-                append(fixture.getId());
-        return sb.toString();
+
+    public static void main(String[] args) throws IOException, InterruptedException {
+        String fromDate = "2019-02-02";
+        String toDate = "2019-02-02";
+
+        DatasetBuilder datasetBuilder = new DatasetBuilder(ALLOWED_COUNTRIES_FILE_NAME,
+                ALLOWED_LEAGUES_FILE_NAME,
+                API_KEY);
+
+//        datasetBuilder.findGames(fromDate, toDate);
+
+        // For demo: comment !fixture.getOutcome().equals("?") || in findGames()
+
+//        datasetBuilder.updateOutcomesFromFile(fromDate, toDate, "Data/inFile", "Data/outFile");
+
     }
 }

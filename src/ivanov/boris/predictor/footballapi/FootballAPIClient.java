@@ -39,26 +39,28 @@ public class FootballAPIClient {
         this.client = client;
     }
 
-    public List<Fixture> getFixtures(String from, String to) throws IOException, InterruptedException {
+    public List<Fixture> getFixtures(String fromDate, String toDate) throws IOException, InterruptedException {
 
         HttpRequest request = HttpRequest.newBuilder().uri(
-                URI.create(API_URL + "?action=get_events&from=" + from + "&to=" + to + "&APIkey=" + apiKey)).build();
+                URI.create(API_URL + "?action=get_events&from=" +
+                        fromDate + "&to=" + toDate + "&APIkey=" + apiKey)).build();
 
         return getFixtures(request);
     }
 
-    public List<Fixture> getFixtures(String from, String to, String leagueId) throws IOException, InterruptedException {
+    public List<Fixture> getFixtures(String fromDate, String toDate, String leagueId)
+            throws IOException, InterruptedException {
 
         HttpRequest request = HttpRequest.newBuilder().uri(
-                URI.create(API_URL + "?action=get_events&from=" + from + "&to=" + to +
+                URI.create(API_URL + "?action=get_events&from=" + fromDate + "&to=" + toDate +
                         "&league_id=" + leagueId + "&APIkey=" + apiKey)).build();
 
         return getFixtures(request);
     }
 
-    public Fixture getFixture(String id) throws IOException, InterruptedException {
+    public Fixture getFixture(String fixtureId) throws IOException, InterruptedException {
         HttpRequest request = HttpRequest.newBuilder().uri(
-                URI.create(API_URL + "?action=get_events&match_id=" + id + "&APIkey=" + apiKey)).build();
+                URI.create(API_URL + "?action=get_events&match_id=" + fixtureId + "&APIkey=" + apiKey)).build();
 
         return getFixtures(request).get(0);
     }

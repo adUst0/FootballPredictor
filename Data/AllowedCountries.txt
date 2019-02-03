@@ -1,0 +1,7 @@
+England 169
+Spain 171
+France 173
+Italy 170
+Portugal 176
+Germany 172
+Australia 253
