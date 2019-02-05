@@ -1,6 +1,7 @@
 package ivanov.boris.predictor;
 
 import ivanov.boris.predictor.classifier.Classifier;
+import ivanov.boris.predictor.classifier.other.FootballPredictor;
 import ivanov.boris.predictor.classifier.other.RandomGuess;
 import ivanov.boris.predictor.classifier.knn.KNearestNeighbors;
 import ivanov.boris.predictor.classifier.other.SimpleProbability;
@@ -11,13 +12,21 @@ import ivanov.boris.predictor.dataset.parser.DoubleDatasetParser;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class Main {
 
     private static final String PATH_TO_DATASET = "Data/SelectedLeaguesOnly.data";
     private static final int NUMBER_OF_TESTS = 100;
+    private static final int NUMBER_OF_THREADS = 8;
+    private static final double TESTING_SET_PERCENT = 0.1;
+    private static final int KNN_MIN_K = 2;
+    private static final int KNN_MAX_K = 4;
 
-    public static double validateClassifier(int testingSetSize, Classifier<Double> classifier,
+    private static double validateClassifier(int testingSetSize, Classifier<Double> classifier,
                                              Dataset<Double> dataset, boolean isLoggingEnabled) {
 
         Collections.shuffle(dataset.getEntries());
@@ -28,8 +37,7 @@ public class Main {
         for (int i = 0; i < dataset.size(); i++) {
             if (i < testingSetSize) {
                 testingData.addEntry(dataset.getEntries().get(i));
-            }
-            else {
+            } else {
                 trainingData.addEntry(dataset.getEntries().get(i));
             }
         }
@@ -47,7 +55,7 @@ public class Main {
             }
         }
 
-        double accuracy = (double)correctPredictions / testingSetSize * 100;
+        double accuracy = (double) correctPredictions / testingSetSize * 100;
 
         if (isLoggingEnabled) {
             System.out.println("\tCorrect predictions: " + correctPredictions);
@@ -59,42 +67,160 @@ public class Main {
         return accuracy;
     }
 
-    public static void testClassifiers(List<Classifier<Double>> classifiers) {
-        DoubleDatasetParser parser = new DoubleDatasetParser();
+    private static void runFootballPredictor() throws ExecutionException, InterruptedException {
+        for (int currentK = KNN_MIN_K; currentK <= KNN_MAX_K; currentK++) {
+            ExecutorService executorService = Executors.newFixedThreadPool(NUMBER_OF_THREADS);
+            List<Future<Double>> futures = new ArrayList<>();
 
-        for (Classifier<Double> classifier : classifiers) {
-            double accuracy = 0;
-
-            for (int i = 0; i < NUMBER_OF_TESTS; i++) {
-                Dataset<Double> dataset = parser.fromFile(PATH_TO_DATASET, "\\s+");
-                accuracy += validateClassifier((int)(dataset.size() * 0.1), classifier, dataset, false);
+            for (int j = 0; j < NUMBER_OF_THREADS; j++) {
+                int kNeighbors = currentK;
+                int threadId = j;
+                futures.add(executorService.submit(() -> runFootballPredictor(kNeighbors, threadId)));
             }
 
-            System.out.println(classifier.getClass() + " => Accuracy: " + (accuracy / NUMBER_OF_TESTS) + " %");
+            double accuracySum = 0;
+
+            for (int i = 0; i < NUMBER_OF_THREADS; i++) {
+                accuracySum += futures.get(i).get();
+            }
+
+            executorService.shutdown();
+
+            System.out.printf("FootballPredictor(%d) => Accuracy: %f%n", currentK, accuracySum / NUMBER_OF_TESTS);
         }
+    }
+
+    private static double runFootballPredictor(int kNeighbors, int threadId) {
+        double accuracySum = 0;
+        FootballPredictor footballPredictor = new FootballPredictor(kNeighbors);
+        DoubleDatasetParser parser = new DoubleDatasetParser();
+
+        for (int i = threadId; i < NUMBER_OF_TESTS; i += NUMBER_OF_THREADS) {
+            Dataset<Double> dataset = parser.fromFile(PATH_TO_DATASET, "\\s+");
+            int testingSetSize = (int) (dataset.size() * TESTING_SET_PERCENT);
+            accuracySum += validateClassifier(testingSetSize, footballPredictor, dataset, false);
+        }
+
+        return accuracySum;
+    }
+
+    private static void runKNearestNeighbors() throws ExecutionException, InterruptedException {
+        for (int currentK = KNN_MIN_K; currentK <= KNN_MAX_K; currentK++) {
+            ExecutorService executorService = Executors.newFixedThreadPool(NUMBER_OF_THREADS);
+            List<Future<Double>> futures = new ArrayList<>();
+
+            for (int j = 0; j < NUMBER_OF_THREADS; j++) {
+                int kNeighbors = currentK;
+                int threadId = j;
+                futures.add(executorService.submit(() -> runKNearestNeighbors(kNeighbors, threadId)));
+            }
+
+            double accuracySum = 0;
+
+            for (int i = 0; i < NUMBER_OF_THREADS; i++) {
+                accuracySum += futures.get(i).get();
+            }
+
+            executorService.shutdown();
+
+            System.out.printf("KNearestNeighbors(%d) => Accuracy: %f%n", currentK, accuracySum / NUMBER_OF_TESTS);
+        }
+    }
+
+    private static double runKNearestNeighbors(int kNeighbors, int threadId) {
+        double accuracySum = 0;
+        KNearestNeighbors kNN = new KNearestNeighbors();
+        kNN.setK(kNeighbors);
+        DoubleDatasetParser parser = new DoubleDatasetParser();
+
+        for (int i = threadId; i < NUMBER_OF_TESTS; i += NUMBER_OF_THREADS) {
+            Dataset<Double> dataset = parser.fromFile(PATH_TO_DATASET, "\\s+");
+            int testingSetSize = (int) (dataset.size() * TESTING_SET_PERCENT);
+            accuracySum += validateClassifier(testingSetSize, kNN, dataset, false);
+        }
+
+        return accuracySum;
+    }
+
+    private static void runRandomGuess() throws ExecutionException, InterruptedException {
+        ExecutorService executorService = Executors.newFixedThreadPool(NUMBER_OF_THREADS);
+        List<Future<Double>> futures = new ArrayList<>();
+
+        for (int j = 0; j < NUMBER_OF_THREADS; j++) {
+            int threadId = j;
+            futures.add(executorService.submit(() -> runRandomGuess(threadId)));
+        }
+
+        double accuracySum = 0;
+
+        for (int i = 0; i < NUMBER_OF_THREADS; i++) {
+            accuracySum += futures.get(i).get();
+        }
+
+        executorService.shutdown();
+
+        System.out.printf("RandomGuess => Accuracy: %f%n", accuracySum / NUMBER_OF_TESTS);
 
     }
 
-    public static void testAllClassifiers() {
-        List<Classifier<Double>> classifiers = new ArrayList<>();
-        for (int k = 4; k <= 4; k++) {
-            KNearestNeighbors knn = new KNearestNeighbors();
-            knn.setK(k);
-            classifiers.add(knn);
+    private static double runRandomGuess(int threadId) {
+        double accuracySum = 0;
+        RandomGuess randomGuess = new RandomGuess();
+        DoubleDatasetParser parser = new DoubleDatasetParser();
+
+        for (int i = threadId; i < NUMBER_OF_TESTS; i += NUMBER_OF_THREADS) {
+            Dataset<Double> dataset = parser.fromFile(PATH_TO_DATASET, "\\s+");
+            int testingSetSize = (int) (dataset.size() * TESTING_SET_PERCENT);
+            accuracySum += validateClassifier(testingSetSize, randomGuess, dataset, false);
         }
 
-        classifiers.add(new RandomGuess());
-        classifiers.add(new SimpleProbability());
-
-        for (int k = 4; k <= 4; k++) {
-            classifiers.add(new FootballPredictor(k));
-        }
-
-        testClassifiers(classifiers);
+        return accuracySum;
     }
 
-    public static void main(String[] args) {
-        testAllClassifiers();
+    private static void runSimpleProbability() throws ExecutionException, InterruptedException {
+        ExecutorService executorService = Executors.newFixedThreadPool(NUMBER_OF_THREADS);
+        List<Future<Double>> futures = new ArrayList<>();
 
+        for (int j = 0; j < NUMBER_OF_THREADS; j++) {
+            int threadId = j;
+            futures.add(executorService.submit(() -> runSimpleProbability(threadId)));
+        }
+
+        double accuracySum = 0;
+
+        for (int i = 0; i < NUMBER_OF_THREADS; i++) {
+            accuracySum += futures.get(i).get();
+        }
+
+        executorService.shutdown();
+
+        System.out.printf("SimpleProbability => Accuracy: %f%n", accuracySum / NUMBER_OF_TESTS);
+
+    }
+
+    private static double runSimpleProbability(int threadId) {
+        double accuracySum = 0;
+        SimpleProbability simpleProbability = new SimpleProbability();
+        DoubleDatasetParser parser = new DoubleDatasetParser();
+
+        for (int i = threadId; i < NUMBER_OF_TESTS; i += NUMBER_OF_THREADS) {
+            Dataset<Double> dataset = parser.fromFile(PATH_TO_DATASET, "\\s+");
+            int testingSetSize = (int) (dataset.size() * TESTING_SET_PERCENT);
+            accuracySum += validateClassifier(testingSetSize, simpleProbability, dataset, false);
+        }
+
+        return accuracySum;
+    }
+
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
+        long startTime = System.currentTimeMillis();
+
+        runFootballPredictor();
+        runKNearestNeighbors();
+        runRandomGuess();
+        runSimpleProbability();
+
+        System.out.printf("%nExecution time: %d ms. Number of threads: %d.%n",
+                System.currentTimeMillis() - startTime, NUMBER_OF_THREADS);
     }
 }

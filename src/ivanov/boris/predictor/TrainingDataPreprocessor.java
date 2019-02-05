@@ -40,9 +40,9 @@ public class TrainingDataPreprocessor {
             DatasetEntry<Double> entry = it.next();
 
             Fixture stats = Fixture.fromDatasetEntry(entry);
-            double wins = stats.getTeam1Last6Games1v1().wins;
-            double draws = stats.getTeam1Last6Games1v1().draws;
-            double looses = stats.getTeam1Last6Games1v1().looses;
+            double wins = stats.team1Last6Games1v1.wins;
+            double draws = stats.team1Last6Games1v1.draws;
+            double looses = stats.team1Last6Games1v1.looses;
             if (wins == draws && wins == looses) {
                 it.remove();
             }

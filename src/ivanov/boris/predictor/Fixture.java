@@ -18,48 +18,16 @@ public class Fixture {
         public double looses;
     }
 
-    private Stats team1League = new Stats(); // all games in current league season
-    private Stats team1Last6Games = new Stats();
-    private Stats team1Last6GamesHome = new Stats();
-    private Stats team1Last6Games1v1 = new Stats();
+    public Stats team1League = new Stats(); // all games in current league season
+    public Stats team1Last6Games = new Stats();
+    public Stats team1Last6GamesHome = new Stats();
+    public Stats team1Last6Games1v1 = new Stats();
 
-    private Stats team2League = new Stats(); // all games in current league season
-    private Stats team2Last6Games = new Stats();
-    private Stats team2Last6GamesAway = new Stats();
+    public Stats team2League = new Stats(); // all games in current league season
+    public Stats team2Last6Games = new Stats();
+    public Stats team2Last6GamesAway = new Stats();
 
-    private String outcome;
-
-    public Stats getTeam1League() {
-        return team1League;
-    }
-
-    public Stats getTeam1Last6Games() {
-        return team1Last6Games;
-    }
-
-    public Stats getTeam1Last6GamesHome() {
-        return team1Last6GamesHome;
-    }
-
-    public Stats getTeam1Last6Games1v1() {
-        return team1Last6Games1v1;
-    }
-
-    public Stats getTeam2League() {
-        return team2League;
-    }
-
-    public Stats getTeam2Last6Games() {
-        return team2Last6Games;
-    }
-
-    public Stats getTeam2Last6GamesAway() {
-        return team2Last6GamesAway;
-    }
-
-    public String getOutcome() {
-        return outcome;
-    }
+    public String outcome;
 
     /**
      * Calculate simple probabilities for this fixture

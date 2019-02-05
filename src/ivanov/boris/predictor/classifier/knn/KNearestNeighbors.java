@@ -44,6 +44,16 @@ public class KNearestNeighbors implements Classifier<Double> {
             double distanceToX = getDistance(entry, x);
             double distanceToY = getDistance(entry, y);
 
+//            if (distanceToX == distanceToY) {
+//                return 0;
+//            }
+//            else if (distanceToX < distanceToY) {
+//                return -1;
+//            }
+//            else {
+//                return 1;
+//            }
+
             return Double.compare(distanceToX, distanceToY);
         });
 

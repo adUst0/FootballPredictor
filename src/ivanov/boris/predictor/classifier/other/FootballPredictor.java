@@ -1,5 +1,7 @@
-package ivanov.boris.predictor;
+package ivanov.boris.predictor.classifier.other;
 
+import ivanov.boris.predictor.Fixture;
+import ivanov.boris.predictor.TrainingDataPreprocessor;
 import ivanov.boris.predictor.classifier.Classifier;
 import ivanov.boris.predictor.classifier.knn.KNearestNeighbors;
 import ivanov.boris.predictor.dataset.Dataset;
