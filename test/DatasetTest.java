@@ -8,18 +8,18 @@ public class DatasetTest {
 
     @Test
     public void testGetAttributesCountOnEmptyDataset() {
-//        Dataset dataset = new Dataset<>();
-//
-//        assertEquals(0, dataset.getAttributesCount());
+        Dataset dataset = new Dataset();
+
+        assertEquals(0, dataset.getAttributesCount());
     }
 
     @Test
     public void testGetAttributesCountOnNonEmptyDataset() {
-//        Dataset dataset = new Dataset<>();
-//        DatasetEntry entry = new DatasetEntry<>();
-//        entry.getAttributes().add(Math.random());
-//        dataset.addEntry(entry);
-//
-//        assertEquals(1, dataset.getAttributesCount());
+        Dataset dataset = new Dataset();
+        DatasetEntry entry = new DatasetEntry();
+        entry.getAttributes().add("Some attribute value");
+        dataset.addEntry(entry);
+
+        assertEquals(entry.getAttributes().size(), dataset.getAttributesCount());
     }
 }

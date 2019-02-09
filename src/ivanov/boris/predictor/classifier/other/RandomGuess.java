@@ -7,11 +7,14 @@ import ivanov.boris.predictor.dataset.DatasetEntry;
 import java.util.*;
 
 public class RandomGuess implements Classifier {
-    private List<String> possibleLabels = new ArrayList<>();
-    private Random random = new Random();
+    private List<String> possibleLabels;
+    private Random random;
 
     @Override
     public void buildModel(Dataset dataset) {
+        possibleLabels = new ArrayList<>();
+        random = new Random();
+
         Set<String> labels = new HashSet<>();
 
         for (DatasetEntry entry : dataset.getEntries()) {

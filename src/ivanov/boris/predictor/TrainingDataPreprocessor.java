@@ -26,6 +26,7 @@ public class TrainingDataPreprocessor {
     public static void prepare(Dataset dataset) {
         removeNoiseData(dataset);
         removeOutliers(dataset);
+//        normalizeDataset(dataset);
     }
 
     /**

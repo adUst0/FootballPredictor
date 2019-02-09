@@ -1,7 +1,9 @@
 package ivanov.boris.predictor;
 
+import ivanov.boris.predictor.dataset.Dataset;
 import ivanov.boris.predictor.dataset.DatasetEntry;
 
+import java.security.PublicKey;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -128,5 +130,11 @@ public class Fixture {
         entry.setLabel(outcome);
 
         return entry;
+    }
+
+    public static Fixture fromString(String string) {
+        DatasetEntry entry = new DatasetEntry(string, "\\s+");
+
+        return Fixture.fromDatasetEntry(entry);
     }
 }
