@@ -23,7 +23,7 @@ public class TrainingDataPreprocessor {
      *
      * @param dataset the dataset which will be transformed
      */
-    public static void prepare(Dataset<Double> dataset) {
+    public static void prepare(Dataset dataset) {
         removeNoiseData(dataset);
         removeOutliers(dataset);
     }
@@ -34,10 +34,10 @@ public class TrainingDataPreprocessor {
      *
      * @param dataset the dataset which will be transformed
      */
-    private static void removeNoiseData(Dataset<Double> dataset) {
-        Iterator<DatasetEntry<Double>> it = dataset.getEntries().iterator();
+    private static void removeNoiseData(Dataset dataset) {
+        Iterator<DatasetEntry> it = dataset.getEntries().iterator();
         while (it.hasNext()) {
-            DatasetEntry<Double> entry = it.next();
+            DatasetEntry entry = it.next();
 
             Fixture stats = Fixture.fromDatasetEntry(entry);
             double wins = stats.team1Last6Games1v1.wins;
@@ -55,12 +55,12 @@ public class TrainingDataPreprocessor {
      *
      * @param dataset the dataset which will be transformed
      */
-    private static void removeOutliers(Dataset<Double> dataset) {
+    private static void removeOutliers(Dataset dataset) {
 
-        Iterator<DatasetEntry<Double>> it = dataset.getEntries().iterator();
+        Iterator<DatasetEntry> it = dataset.getEntries().iterator();
         while (it.hasNext()) {
 
-            DatasetEntry<Double> entry = it.next();
+            DatasetEntry entry = it.next();
             String label = entry.getLabel();
             Map<String, Double> probabilities = Fixture.fromDatasetEntry(entry).getOutcomeProbabilities();
 
@@ -78,10 +78,10 @@ public class TrainingDataPreprocessor {
      *
      * @param dataset the dataset which will be transformed
      */
-    private static void normalizeDataset(Dataset<Double> dataset) {
+    private static void normalizeDataset(Dataset dataset) {
         Map<String, Integer> classOccurrences = new HashMap<>();
 
-        for (DatasetEntry<Double> entry : dataset.getEntries()) {
+        for (DatasetEntry entry : dataset.getEntries()) {
             String label = entry.getLabel();
             if (classOccurrences.containsKey(label)) {
                 classOccurrences.put(label, classOccurrences.get(label) + 1);
@@ -94,9 +94,9 @@ public class TrainingDataPreprocessor {
 
         Collections.shuffle(dataset.getEntries());
 
-        Iterator<DatasetEntry<Double>> it = dataset.getEntries().iterator();
+        Iterator<DatasetEntry> it = dataset.getEntries().iterator();
         while (it.hasNext()) {
-            DatasetEntry<Double> entry = it.next();
+            DatasetEntry entry = it.next();
             String label = entry.getLabel();
             if (classOccurrences.get(label) > minOccurrences) {
                 it.remove();

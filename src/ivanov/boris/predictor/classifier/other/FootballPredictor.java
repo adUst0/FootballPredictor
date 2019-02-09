@@ -7,37 +7,40 @@ import ivanov.boris.predictor.classifier.knn.KNearestNeighbors;
 import ivanov.boris.predictor.dataset.Dataset;
 import ivanov.boris.predictor.dataset.DatasetEntry;
 
-public class FootballPredictor implements Classifier<Double> {
+import java.util.Map;
 
-    private static final int K_NEIGHBORS = 3;
+public class FootballPredictor implements Classifier {
+
+    private static final int K_NEIGHBORS_DEFAULT = 3;
     private static final double SIMPLE_PROBABILITY_THRESHOLD = 0.65;
 
     private KNearestNeighbors kNN =  new KNearestNeighbors();
-
-    public FootballPredictor(int kNeighbors) {
-        kNN.setK(kNeighbors);
-    }
 
     public FootballPredictor() {
 
     }
 
-    @Override
-    public void buildModel(Dataset<Double> dataset) {
-        TrainingDataPreprocessor.prepare(dataset);
-        kNN.buildModel(dataset, K_NEIGHBORS);
+    public FootballPredictor(int kNeighbors) {
+        kNN.setK(kNeighbors);
     }
 
     @Override
-    public String classify(DatasetEntry<Double> entry) {
+    public void buildModel(Dataset dataset) {
+        TrainingDataPreprocessor.prepare(dataset);
+        kNN.buildModel(dataset, K_NEIGHBORS_DEFAULT);
+    }
+
+    @Override
+    public String classify(DatasetEntry entry) {
         Fixture fixture = Fixture.fromDatasetEntry(entry);
 
-        var probabilities = fixture.getOutcomeProbabilities();
+        Map<String, Double> probabilities = fixture.getOutcomeProbabilities();
         var iterator = probabilities.entrySet().iterator();
-        var mostProbableOutcome = iterator.next();
+
+        Map.Entry<String, Double> mostProbableOutcome = iterator.next();
 
         while (iterator.hasNext()) {
-            var currentOutcome = iterator.next();
+            Map.Entry<String, Double> currentOutcome = iterator.next();
 
             if (currentOutcome.getValue() > mostProbableOutcome.getValue()) {
                 mostProbableOutcome = currentOutcome;
@@ -52,7 +55,7 @@ public class FootballPredictor implements Classifier<Double> {
         }
     }
 
-    public void predictAll(Dataset<Double> toPredict) {
+    public void predictAll(Dataset toPredict) {
         for (DatasetEntry entry : toPredict.getEntries()) {
             System.out.println(entry.getAttributes() + " " + entry.getLabel());
             System.out.println("\tPrediction: " + kNN.classify(entry));

@@ -7,7 +7,6 @@ import ivanov.boris.predictor.classifier.knn.KNearestNeighbors;
 import ivanov.boris.predictor.classifier.other.SimpleProbability;
 import ivanov.boris.predictor.dataset.Dataset;
 import ivanov.boris.predictor.dataset.DatasetEntry;
-import ivanov.boris.predictor.dataset.parser.DoubleDatasetParser;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,19 +19,20 @@ import java.util.concurrent.Future;
 public class Main {
 
     private static final String PATH_TO_DATASET = "Data/SelectedLeaguesOnly.data";
-    private static final int NUMBER_OF_TESTS = 100;
+    private static final int NUMBER_OF_TESTS = 1000;
     private static final int NUMBER_OF_THREADS = 8;
-    private static final double TESTING_SET_PERCENT = 0.1;
+    private static final double TESTING_SET_PERCENT = 0.05;
     private static final int KNN_MIN_K = 2;
     private static final int KNN_MAX_K = 4;
+    private static final boolean IS_LOGGING_ENABLED = false;
 
-    private static double validateClassifier(int testingSetSize, Classifier<Double> classifier,
-                                             Dataset<Double> dataset, boolean isLoggingEnabled) {
+    private static double validateClassifier(int testingSetSize, Classifier classifier,
+                                             Dataset dataset, boolean isLoggingEnabled) {
 
         Collections.shuffle(dataset.getEntries());
 
-        Dataset<Double> trainingData = new Dataset<>();
-        Dataset<Double> testingData = new Dataset<>();
+        Dataset trainingData = new Dataset();
+        Dataset testingData = new Dataset();
 
         for (int i = 0; i < dataset.size(); i++) {
             if (i < testingSetSize) {
@@ -47,7 +47,7 @@ public class Main {
 
         int correctPredictions = 0;
 
-        for (DatasetEntry<Double> entry : testingData.getEntries()) {
+        for (DatasetEntry entry : testingData.getEntries()) {
 //            System.out.print(entry);
             String label = classifier.classify(entry);
             if (label.equals(entry.getLabel())) {
@@ -73,9 +73,9 @@ public class Main {
             List<Future<Double>> futures = new ArrayList<>();
 
             for (int j = 0; j < NUMBER_OF_THREADS; j++) {
-                int kNeighbors = currentK;
                 int threadId = j;
-                futures.add(executorService.submit(() -> runFootballPredictor(kNeighbors, threadId)));
+                FootballPredictor footballPredictor = new FootballPredictor(currentK);
+                futures.add(executorService.submit(() -> runClassifier(footballPredictor, threadId)));
             }
 
             double accuracySum = 0;
@@ -90,29 +90,16 @@ public class Main {
         }
     }
 
-    private static double runFootballPredictor(int kNeighbors, int threadId) {
-        double accuracySum = 0;
-        FootballPredictor footballPredictor = new FootballPredictor(kNeighbors);
-        DoubleDatasetParser parser = new DoubleDatasetParser();
-
-        for (int i = threadId; i < NUMBER_OF_TESTS; i += NUMBER_OF_THREADS) {
-            Dataset<Double> dataset = parser.fromFile(PATH_TO_DATASET, "\\s+");
-            int testingSetSize = (int) (dataset.size() * TESTING_SET_PERCENT);
-            accuracySum += validateClassifier(testingSetSize, footballPredictor, dataset, false);
-        }
-
-        return accuracySum;
-    }
-
     private static void runKNearestNeighbors() throws ExecutionException, InterruptedException {
         for (int currentK = KNN_MIN_K; currentK <= KNN_MAX_K; currentK++) {
             ExecutorService executorService = Executors.newFixedThreadPool(NUMBER_OF_THREADS);
             List<Future<Double>> futures = new ArrayList<>();
 
             for (int j = 0; j < NUMBER_OF_THREADS; j++) {
-                int kNeighbors = currentK;
                 int threadId = j;
-                futures.add(executorService.submit(() -> runKNearestNeighbors(kNeighbors, threadId)));
+                KNearestNeighbors kNearestNeighbors = new KNearestNeighbors();
+                kNearestNeighbors.setK(currentK);
+                futures.add(executorService.submit(() -> runClassifier(kNearestNeighbors, threadId)));
             }
 
             double accuracySum = 0;
@@ -127,28 +114,14 @@ public class Main {
         }
     }
 
-    private static double runKNearestNeighbors(int kNeighbors, int threadId) {
-        double accuracySum = 0;
-        KNearestNeighbors kNN = new KNearestNeighbors();
-        kNN.setK(kNeighbors);
-        DoubleDatasetParser parser = new DoubleDatasetParser();
-
-        for (int i = threadId; i < NUMBER_OF_TESTS; i += NUMBER_OF_THREADS) {
-            Dataset<Double> dataset = parser.fromFile(PATH_TO_DATASET, "\\s+");
-            int testingSetSize = (int) (dataset.size() * TESTING_SET_PERCENT);
-            accuracySum += validateClassifier(testingSetSize, kNN, dataset, false);
-        }
-
-        return accuracySum;
-    }
-
     private static void runRandomGuess() throws ExecutionException, InterruptedException {
         ExecutorService executorService = Executors.newFixedThreadPool(NUMBER_OF_THREADS);
         List<Future<Double>> futures = new ArrayList<>();
 
         for (int j = 0; j < NUMBER_OF_THREADS; j++) {
             int threadId = j;
-            futures.add(executorService.submit(() -> runRandomGuess(threadId)));
+            RandomGuess randomGuess = new RandomGuess();
+            futures.add(executorService.submit(() -> runClassifier(randomGuess, threadId)));
         }
 
         double accuracySum = 0;
@@ -163,27 +136,14 @@ public class Main {
 
     }
 
-    private static double runRandomGuess(int threadId) {
-        double accuracySum = 0;
-        RandomGuess randomGuess = new RandomGuess();
-        DoubleDatasetParser parser = new DoubleDatasetParser();
-
-        for (int i = threadId; i < NUMBER_OF_TESTS; i += NUMBER_OF_THREADS) {
-            Dataset<Double> dataset = parser.fromFile(PATH_TO_DATASET, "\\s+");
-            int testingSetSize = (int) (dataset.size() * TESTING_SET_PERCENT);
-            accuracySum += validateClassifier(testingSetSize, randomGuess, dataset, false);
-        }
-
-        return accuracySum;
-    }
-
     private static void runSimpleProbability() throws ExecutionException, InterruptedException {
         ExecutorService executorService = Executors.newFixedThreadPool(NUMBER_OF_THREADS);
         List<Future<Double>> futures = new ArrayList<>();
 
         for (int j = 0; j < NUMBER_OF_THREADS; j++) {
             int threadId = j;
-            futures.add(executorService.submit(() -> runSimpleProbability(threadId)));
+            SimpleProbability simpleProbability = new SimpleProbability();
+            futures.add(executorService.submit(() -> runClassifier(simpleProbability, threadId)));
         }
 
         double accuracySum = 0;
@@ -198,27 +158,29 @@ public class Main {
 
     }
 
-    private static double runSimpleProbability(int threadId) {
+    private static double runClassifier(Classifier classifier, int threadId) {
         double accuracySum = 0;
-        SimpleProbability simpleProbability = new SimpleProbability();
-        DoubleDatasetParser parser = new DoubleDatasetParser();
 
         for (int i = threadId; i < NUMBER_OF_TESTS; i += NUMBER_OF_THREADS) {
-            Dataset<Double> dataset = parser.fromFile(PATH_TO_DATASET, "\\s+");
+            Dataset dataset = Dataset.fromFile(PATH_TO_DATASET, "\\s+");
             int testingSetSize = (int) (dataset.size() * TESTING_SET_PERCENT);
-            accuracySum += validateClassifier(testingSetSize, simpleProbability, dataset, false);
+            accuracySum += validateClassifier(testingSetSize, classifier, dataset, IS_LOGGING_ENABLED);
         }
 
         return accuracySum;
     }
 
-    public static void main(String[] args) throws ExecutionException, InterruptedException {
-        long startTime = System.currentTimeMillis();
-
+    private static void runAllClassifiers() throws ExecutionException, InterruptedException {
         runFootballPredictor();
         runKNearestNeighbors();
         runRandomGuess();
         runSimpleProbability();
+    }
+
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
+        long startTime = System.currentTimeMillis();
+
+        runAllClassifiers();
 
         System.out.printf("%nExecution time: %d ms. Number of threads: %d.%n",
                 System.currentTimeMillis() - startTime, NUMBER_OF_THREADS);

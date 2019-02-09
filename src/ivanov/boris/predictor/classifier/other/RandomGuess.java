@@ -6,12 +6,12 @@ import ivanov.boris.predictor.dataset.DatasetEntry;
 
 import java.util.*;
 
-public class RandomGuess implements Classifier<Double> {
+public class RandomGuess implements Classifier {
     private List<String> possibleLabels = new ArrayList<>();
     private Random random = new Random();
 
     @Override
-    public void buildModel(Dataset<Double> dataset) {
+    public void buildModel(Dataset dataset) {
         Set<String> labels = new HashSet<>();
 
         for (DatasetEntry entry : dataset.getEntries()) {
@@ -22,7 +22,7 @@ public class RandomGuess implements Classifier<Double> {
     }
 
     @Override
-    public String classify(DatasetEntry<Double> entry) {
+    public String classify(DatasetEntry entry) {
         return possibleLabels.get(random.nextInt(possibleLabels.size()));
     }
 }

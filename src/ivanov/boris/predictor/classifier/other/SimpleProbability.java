@@ -7,7 +7,7 @@ import ivanov.boris.predictor.dataset.DatasetEntry;
 
 import java.util.Map;
 
-public class SimpleProbability implements Classifier<Double> {
+public class SimpleProbability implements Classifier {
 
     @Override
     public void buildModel(Dataset dataset) {
@@ -15,7 +15,7 @@ public class SimpleProbability implements Classifier<Double> {
     }
 
     @Override
-    public String classify(DatasetEntry<Double> entry) {
+    public String classify(DatasetEntry entry) {
         Map<String, Double> probabilities = Fixture.fromDatasetEntry(entry).getOutcomeProbabilities();
 
         var iterator = probabilities.entrySet().iterator();

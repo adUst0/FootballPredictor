@@ -10,49 +10,51 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class KNearestNeighbors implements Classifier<Double> {
+public class KNearestNeighbors implements Classifier {
     private static final int DEFAULT_K = 10;
 
-    private Dataset<Double> dataset = null;
+    private List<Entry> myDataset;
     private int k = DEFAULT_K;
 
-    private double getDistance(DatasetEntry<Double> a, DatasetEntry<Double> b) {
+    private static double getDistance(Entry point1, Entry point2) {
         double sum = 0;
 
-        for (int i = 0; i < a.getAttributes().size(); i++) {
-            sum += Math.pow((a.getAttributes().get(i) - b.getAttributes().get(i)), 2);
+        for (int i = 0; i < point1.attributes.size(); i++) {
+            double q1 = point1.attributes.get(i);
+            double q2 = point2.attributes.get(i);
+
+            sum += Math.pow(q1 - q2, 2);
         }
 
         return Math.sqrt(sum);
     }
 
     @Override
-    public void buildModel(Dataset<Double> dataset) {
-        this.dataset = dataset;
+    public void buildModel(Dataset dataset) {
+        myDataset = new ArrayList<>();
+        for (DatasetEntry entry : dataset.getEntries()) {
+            myDataset.add(new Entry(entry));
+        }
     }
 
-    public void buildModel(Dataset<Double> dataset, int k) {
-        this.dataset = dataset;
+    public void buildModel(Dataset dataset, int k) {
+        myDataset = new ArrayList<>();
+
+        for (DatasetEntry entry : dataset.getEntries()) {
+            myDataset.add(new Entry(entry));
+        }
+
         this.k = k;
     }
 
     @Override
-    public String classify(DatasetEntry<Double> entry) {
-        List<DatasetEntry<Double>> entries = dataset.getEntries();
+    public String classify(DatasetEntry datasetEntry) {
+        // TODO: performance optimizations required
+        Entry toClassify = new Entry(datasetEntry);
 
-        entries.sort((x, y) -> {
-            double distanceToX = getDistance(entry, x);
-            double distanceToY = getDistance(entry, y);
-
-//            if (distanceToX == distanceToY) {
-//                return 0;
-//            }
-//            else if (distanceToX < distanceToY) {
-//                return -1;
-//            }
-//            else {
-//                return 1;
-//            }
+        myDataset.sort((x, y) -> {
+            double distanceToX = getDistance(toClassify, x);
+            double distanceToY = getDistance(toClassify, y);
 
             return Double.compare(distanceToX, distanceToY);
         });
@@ -60,13 +62,13 @@ public class KNearestNeighbors implements Classifier<Double> {
         // find first K neighbors
         Map<String, Integer> labelsOccurrences = new HashMap<>();
         for (int i = 0; i < this.k; i++) {
-            DatasetEntry<Double> current = entries.get(i);
-            if (!labelsOccurrences.containsKey(current.getLabel())) {
-                labelsOccurrences.put(current.getLabel(), 1);
+            Entry current = myDataset.get(i);
+            if (!labelsOccurrences.containsKey(current.label)) {
+                labelsOccurrences.put(current.label, 1);
             }
             else {
-                int newValue = labelsOccurrences.get(current.getLabel()) + 1;
-                labelsOccurrences.put(current.getLabel(), newValue);
+                int newValue = labelsOccurrences.get(current.label) + 1;
+                labelsOccurrences.put(current.label, newValue);
             }
         }
 
@@ -85,7 +87,7 @@ public class KNearestNeighbors implements Classifier<Double> {
         }
 
         for (int i = 0; i < this.k; i++) {
-            String current = entries.get(i).getLabel();
+            String current = myDataset.get(i).label;
             if (candidates.contains(current)) {
                 return current;
             }

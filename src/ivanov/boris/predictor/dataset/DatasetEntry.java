@@ -1,26 +1,37 @@
 package ivanov.boris.predictor.dataset;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+public class DatasetEntry {
 
-public class DatasetEntry<T> {
-    private List<T> attributes = new ArrayList<>();
+    private List<String> attributes = new ArrayList<>();
     private String label = null;
 
-    public DatasetEntry() {}
+    public DatasetEntry() {
 
-    public DatasetEntry(List<T> attributes, String label) {
+    }
+
+    public DatasetEntry(String entry, String delimiter) {
+        List<String> attributes = Arrays.asList(entry.split(delimiter));
+
+        this.label = attributes.get(attributes.size() - 1);
+        this.attributes.addAll(attributes);
+        this.attributes.remove(this.attributes.size() - 1);
+    }
+
+    public DatasetEntry(List<String> attributes, String label) {
         this.attributes = attributes;
         this.label = label;
     }
 
-    public DatasetEntry(DatasetEntry<T> other) {
+    public DatasetEntry(DatasetEntry other) {
         this.label = other.label;
         attributes = new ArrayList<>(other.attributes);
     }
 
-    public List<T> getAttributes() {
+    public List<String> getAttributes() {
         return attributes;
     }
 
@@ -36,11 +47,8 @@ public class DatasetEntry<T> {
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
-        for (int j = 0; j < attributes.size(); j++) {
-            sb.append(attributes.get(j)).append(" ");
-            if (j == 11 || j == 20) {
-                sb.append("    ");
-            }
+        for (String attribute : attributes) {
+            sb.append(attribute).append(" ");
         }
         sb.append(label);
 

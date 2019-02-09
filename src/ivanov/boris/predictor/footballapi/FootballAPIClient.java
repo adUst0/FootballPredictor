@@ -18,7 +18,7 @@ import java.util.List;
 
 public class FootballAPIClient {
 
-    private final String API_URL = "https://apifootball.com/api/";
+    private static final String API_URL = "https://apifootball.com/api/";
 
     private String apiKey;
     private HttpClient client;

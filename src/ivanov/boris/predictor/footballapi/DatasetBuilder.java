@@ -160,9 +160,10 @@ public class DatasetBuilder {
         String homeTeam1v1 = h2h.get1v1FirstTeam();
         String awayTeam1v1 = h2h.get1v1SecondTeam();
 
-        sb.append(homeTeamLeagueStats).append(" ").append(homeTeamLast6).append(" ").append(homeTeamLast6Home).append(" ").append(homeTeam1v1).append("     ").
-                append(awayTeamLeagueStats).append(" ").append(awayTeamLast6).append(" ").append(awayTeamLast6Away).append(" ").append(awayTeam1v1).append("     ").
-                append("?");
+        sb.append(homeTeamLeagueStats).append(" ").append(homeTeamLast6).append(" ").append(homeTeamLast6Home).
+                append(" ").append(homeTeam1v1).append("     ").append(awayTeamLeagueStats).append(" ").
+                append(awayTeamLast6).append(" ").append(awayTeamLast6Away).append(" ").append(awayTeam1v1).
+                append("     ").append("?");
 
         return sb.toString();
     }
@@ -183,7 +184,6 @@ public class DatasetBuilder {
                 append(lg.getLooses());
         return sb.toString();
     }
-
 
 
     public static void main(String[] args) throws IOException, InterruptedException {

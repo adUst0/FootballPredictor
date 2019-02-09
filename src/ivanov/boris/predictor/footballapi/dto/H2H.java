@@ -1,10 +1,14 @@
 package ivanov.boris.predictor.footballapi.dto;
 
 import com.google.gson.annotations.SerializedName;
+import com.sun.jdi.PrimitiveValue;
 
 import java.util.List;
 
 public class H2H {
+    private static final int DATASET_MAX_GAMES_IN_GROUP = 6;
+    private static final int DATASET_CATEGORIES_IN_GROUP = 3;
+
     private transient String firstTeamName;
     private transient String secondTeamName;
     private transient String leagueId;
@@ -69,7 +73,7 @@ public class H2H {
     public String getFirstTeamLast6Games(boolean onlyHomeTerrain) {
         double wins = 0, draws = 0, looses = 0;
 
-        for (int i = 0; i < firstTeamLastResults.size() && wins + draws + looses < 6; i++) {
+        for (int i = 0; i < firstTeamLastResults.size() && wins + draws + looses < DATASET_MAX_GAMES_IN_GROUP; i++) {
             Fixture fixture = firstTeamLastResults.get(i);
             String outcome = fixture.getOutcome();
 
@@ -102,10 +106,10 @@ public class H2H {
             }
         }
 
-        // Normalize results if there are less than 6 games
-        if (wins + draws + looses < 6) {
-            double missingGames = 6 - (wins + draws + looses);
-            double valueToAdd = Math.floor(missingGames / 3 * 100) / 100;
+        // Normalize results if there are less than DATASET_MAX_GAMES_IN_GROUP games
+        if (wins + draws + looses < DATASET_MAX_GAMES_IN_GROUP) {
+            double missingGames = DATASET_MAX_GAMES_IN_GROUP - (wins + draws + looses);
+            double valueToAdd = Math.floor(missingGames / DATASET_CATEGORIES_IN_GROUP * 100) / 100;
 
             wins += valueToAdd;
             draws += valueToAdd;
@@ -118,7 +122,7 @@ public class H2H {
     public String getSecondTeamLast6Games(boolean onlyAwayTerrain) {
         double wins = 0, draws = 0, looses = 0;
 
-        for (int i = 0; i < secondTeamLastResults.size() && wins + draws + looses < 6; i++) {
+        for (int i = 0; i < secondTeamLastResults.size() && wins + draws + looses < DATASET_MAX_GAMES_IN_GROUP; i++) {
             Fixture fixture = secondTeamLastResults.get(i);
             String outcome = fixture.getOutcome();
 
@@ -152,9 +156,9 @@ public class H2H {
         }
 
         // Normalize results if there are less than 6 games
-        if (wins + draws + looses < 6) {
-            double missingGames = 6 - (wins + draws + looses);
-            double valueToAdd = Math.floor(missingGames / 3 * 100) / 100;
+        if (wins + draws + looses < DATASET_MAX_GAMES_IN_GROUP) {
+            double missingGames = DATASET_MAX_GAMES_IN_GROUP - (wins + draws + looses);
+            double valueToAdd = Math.floor(missingGames / DATASET_CATEGORIES_IN_GROUP * 100) / 100;
 
             wins += valueToAdd;
             draws += valueToAdd;
@@ -167,7 +171,8 @@ public class H2H {
     public String get1v1FirstTeam() {
         double wins = 0, draws = 0, looses = 0;
 
-        for (int i = 0; i < 6 && i < firstVSSecond.size() && wins + draws + looses < 6; i++) {
+        for (int i = 0; i < DATASET_MAX_GAMES_IN_GROUP && i < firstVSSecond.size() &&
+                wins + draws + looses < DATASET_MAX_GAMES_IN_GROUP; i++) {
             Fixture fixture = firstVSSecond.get(i);
             String outcome = fixture.getOutcome();
 
@@ -193,9 +198,9 @@ public class H2H {
         }
 
         // Normalize results if there are less than 6 games
-        if (wins + draws + looses < 6) {
-            double missingGames = 6 - (wins + draws + looses);
-            double valueToAdd = Math.floor(missingGames / 3 * 100) / 100;
+        if (wins + draws + looses < DATASET_MAX_GAMES_IN_GROUP) {
+            double missingGames = DATASET_MAX_GAMES_IN_GROUP - (wins + draws + looses);
+            double valueToAdd = Math.floor(missingGames / DATASET_CATEGORIES_IN_GROUP * 100) / 100;
 
             wins += valueToAdd;
             draws += valueToAdd;

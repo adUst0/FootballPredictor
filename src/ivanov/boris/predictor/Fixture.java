@@ -8,6 +8,8 @@ import java.util.Map;
 /**
  * This class has strong dependency with the Dataset format and it has to be updated accordingly on
  * every format change.
+ * <p>
+ * Its main purpose is to build an abstraction layer for the other modules to use.
  */
 
 public class Fixture {
@@ -56,70 +58,72 @@ public class Fixture {
         return probabilities;
     }
 
-    public static Fixture fromDatasetEntry(DatasetEntry<Double> entry) {
+    public static Fixture fromDatasetEntry(DatasetEntry entry) {
         Fixture stats = new Fixture();
-        stats.team1League.wins = entry.getAttributes().get(0);
-        stats.team1League.draws = entry.getAttributes().get(1);
-        stats.team1League.looses = entry.getAttributes().get(2);
 
-        stats.team1Last6Games.wins = entry.getAttributes().get(3);
-        stats.team1Last6Games.draws = entry.getAttributes().get(4);
-        stats.team1Last6Games.looses = entry.getAttributes().get(5);
+        stats.team1League.wins = Double.parseDouble(entry.getAttributes().get(0));
+        stats.team1League.draws = Double.parseDouble(entry.getAttributes().get(1));
+        stats.team1League.looses = Double.parseDouble(entry.getAttributes().get(2));
 
-        stats.team1Last6GamesHome.wins = entry.getAttributes().get(6);
-        stats.team1Last6GamesHome.draws = entry.getAttributes().get(7);
-        stats.team1Last6GamesHome.looses = entry.getAttributes().get(8);
+        stats.team1Last6Games.wins = Double.parseDouble(entry.getAttributes().get(3));
+        stats.team1Last6Games.draws = Double.parseDouble(entry.getAttributes().get(4));
+        stats.team1Last6Games.looses = Double.parseDouble(entry.getAttributes().get(5));
 
-        stats.team1Last6Games1v1.wins = entry.getAttributes().get(9);
-        stats.team1Last6Games1v1.draws = entry.getAttributes().get(10);
-        stats.team1Last6Games1v1.looses = entry.getAttributes().get(11);
+        stats.team1Last6GamesHome.wins = Double.parseDouble(entry.getAttributes().get(6));
+        stats.team1Last6GamesHome.draws = Double.parseDouble(entry.getAttributes().get(7));
+        stats.team1Last6GamesHome.looses = Double.parseDouble(entry.getAttributes().get(8));
 
-        stats.team2League.wins = entry.getAttributes().get(12);
-        stats.team2League.draws = entry.getAttributes().get(13);
-        stats.team2League.looses = entry.getAttributes().get(14);
+        stats.team1Last6Games1v1.wins = Double.parseDouble(entry.getAttributes().get(9));
+        stats.team1Last6Games1v1.draws = Double.parseDouble(entry.getAttributes().get(10));
+        stats.team1Last6Games1v1.looses = Double.parseDouble(entry.getAttributes().get(11));
 
-        stats.team2Last6Games.wins = entry.getAttributes().get(15);
-        stats.team2Last6Games.draws = entry.getAttributes().get(16);
-        stats.team2Last6Games.looses = entry.getAttributes().get(17);
+        stats.team2League.wins = Double.parseDouble(entry.getAttributes().get(12));
+        stats.team2League.draws = Double.parseDouble(entry.getAttributes().get(13));
+        stats.team2League.looses = Double.parseDouble(entry.getAttributes().get(14));
 
-        stats.team2Last6GamesAway.wins = entry.getAttributes().get(18);
-        stats.team2Last6GamesAway.draws = entry.getAttributes().get(19);
-        stats.team2Last6GamesAway.looses = entry.getAttributes().get(20);
+        stats.team2Last6Games.wins = Double.parseDouble(entry.getAttributes().get(15));
+        stats.team2Last6Games.draws = Double.parseDouble(entry.getAttributes().get(16));
+        stats.team2Last6Games.looses = Double.parseDouble(entry.getAttributes().get(17));
+
+        stats.team2Last6GamesAway.wins = Double.parseDouble(entry.getAttributes().get(18));
+        stats.team2Last6GamesAway.draws = Double.parseDouble(entry.getAttributes().get(19));
+        stats.team2Last6GamesAway.looses = Double.parseDouble(entry.getAttributes().get(20));
 
         stats.outcome = entry.getLabel();
 
         return stats;
     }
 
-    public DatasetEntry<Double> toDatasetEntry() {
-        DatasetEntry<Double> entry = new DatasetEntry<>();
-        entry.getAttributes().add(team1League.wins);
-        entry.getAttributes().add(team1League.draws);
-        entry.getAttributes().add(team1League.looses);
+    public DatasetEntry toDatasetEntry() {
+        DatasetEntry entry = new DatasetEntry();
 
-        entry.getAttributes().add(team1Last6Games.wins);
-        entry.getAttributes().add(team1Last6Games.draws);
-        entry.getAttributes().add(team1Last6Games.looses);
+        entry.getAttributes().add(String.valueOf(team1League.wins));
+        entry.getAttributes().add(String.valueOf(team1League.draws));
+        entry.getAttributes().add(String.valueOf(team1League.looses));
 
-        entry.getAttributes().add(team1Last6GamesHome.wins);
-        entry.getAttributes().add(team1Last6GamesHome.draws);
-        entry.getAttributes().add(team1Last6GamesHome.looses);
+        entry.getAttributes().add(String.valueOf(team1Last6Games.wins));
+        entry.getAttributes().add(String.valueOf(team1Last6Games.draws));
+        entry.getAttributes().add(String.valueOf(team1Last6Games.looses));
 
-        entry.getAttributes().add(team1Last6Games1v1.wins);
-        entry.getAttributes().add(team1Last6Games1v1.draws);
-        entry.getAttributes().add(team1Last6Games1v1.looses);
+        entry.getAttributes().add(String.valueOf(team1Last6GamesHome.wins));
+        entry.getAttributes().add(String.valueOf(team1Last6GamesHome.draws));
+        entry.getAttributes().add(String.valueOf(team1Last6GamesHome.looses));
 
-        entry.getAttributes().add(team2League.wins);
-        entry.getAttributes().add(team2League.draws);
-        entry.getAttributes().add(team2League.looses);
+        entry.getAttributes().add(String.valueOf(team1Last6Games1v1.wins));
+        entry.getAttributes().add(String.valueOf(team1Last6Games1v1.draws));
+        entry.getAttributes().add(String.valueOf(team1Last6Games1v1.looses));
 
-        entry.getAttributes().add(team2Last6Games.wins);
-        entry.getAttributes().add(team2Last6Games.draws);
-        entry.getAttributes().add(team2Last6Games.looses);
+        entry.getAttributes().add(String.valueOf(team2League.wins));
+        entry.getAttributes().add(String.valueOf(team2League.draws));
+        entry.getAttributes().add(String.valueOf(team2League.looses));
 
-        entry.getAttributes().add(team2Last6GamesAway.wins);
-        entry.getAttributes().add(team2Last6GamesAway.draws);
-        entry.getAttributes().add(team2Last6GamesAway.looses);
+        entry.getAttributes().add(String.valueOf(team2Last6Games.wins));
+        entry.getAttributes().add(String.valueOf(team2Last6Games.draws));
+        entry.getAttributes().add(String.valueOf(team2Last6Games.looses));
+
+        entry.getAttributes().add(String.valueOf(team2Last6GamesAway.wins));
+        entry.getAttributes().add(String.valueOf(team2Last6GamesAway.draws));
+        entry.getAttributes().add(String.valueOf(team2Last6GamesAway.looses));
 
         entry.setLabel(outcome);
 
