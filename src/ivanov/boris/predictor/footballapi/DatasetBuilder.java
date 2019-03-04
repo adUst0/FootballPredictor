@@ -187,14 +187,14 @@ public class DatasetBuilder {
 
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        String fromDate = "2019-02-02";
-        String toDate = "2019-02-02";
+        String fromDate = "2019-02-13";
+        String toDate = "2019-02-16";
 
         DatasetBuilder datasetBuilder = new DatasetBuilder(ALLOWED_COUNTRIES_FILE_NAME,
                 ALLOWED_LEAGUES_FILE_NAME,
                 API_KEY);
 
-//        datasetBuilder.findGames(fromDate, toDate);
+        datasetBuilder.findGames(fromDate, toDate);
 
         // For demo: comment !fixture.getOutcome().equals("?") || in findGames()
 

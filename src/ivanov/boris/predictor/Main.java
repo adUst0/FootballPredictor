@@ -178,11 +178,19 @@ public class Main {
     }
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {
-        long startTime = System.currentTimeMillis();
+//        long startTime = System.currentTimeMillis();
+//
+//        runAllClassifiers();
+//
+//        System.out.printf("%nExecution time: %d ms. Number of threads: %d.%n",
+//                System.currentTimeMillis() - startTime, NUMBER_OF_THREADS);
 
-        runAllClassifiers();
+        DatasetEntry entry = new DatasetEntry("6 10 9 1.0 2.0 3.0 1.0 3.0 2.0 1.66 2.66 1.66     5 8 12 1.0 3.0 2.0 1.6600000000000001 2.66 1.6600000000000001     ?", "\\s+");
 
-        System.out.printf("%nExecution time: %d ms. Number of threads: %d.%n",
-                System.currentTimeMillis() - startTime, NUMBER_OF_THREADS);
+        FootballPredictor predictor = new FootballPredictor(3);
+        Dataset dataset = Dataset.fromFile(PATH_TO_DATASET, "\\s+");
+        predictor.buildModel(dataset);
+
+        System.out.println(predictor.classify(entry));
     }
 }
